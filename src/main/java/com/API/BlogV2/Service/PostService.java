@@ -1,5 +1,7 @@
 package com.API.BlogV2.Service;
 
+import com.API.BlogV2.DTO.PostDTO;
+import com.API.BlogV2.DTO.PostMapper;
 import com.API.BlogV2.Entity.Post;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Repository.PostRepository;
@@ -21,6 +23,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+    @Autowired
+    private PostMapper postMapper;
 
     @Autowired
     public PostService(PostRepository postRepository, UserRepository userRepository) {
@@ -38,13 +42,14 @@ public class PostService {
         postRepository.save(p);
     }
 
-    public Page<Post> getPostsByUserId(Long userId,int page, int size) {
+    public Page<PostDTO> getPostsByUserId(Long userId, int page, int size) {
 
         Pageable pageable = PageRequest.of(page,size, Sort.by("id").descending());
 
-        // Note: findAllById(userId) is for finding multiple Posts by Post IDs.
-        // You should create a custom method in PostRepository: findByUserId(Long userId)
-        return postRepository.findByUserId(userId,pageable);
+        Page<Post> postPage = postRepository.findByUserId(userId,pageable);
+
+        // this is where DTO comes into picture , observer the mapToDTO method
+        return postPage.map(post -> postMapper.mapToDTO(post));
     }
 
     //    public void deletePost(Long id){}

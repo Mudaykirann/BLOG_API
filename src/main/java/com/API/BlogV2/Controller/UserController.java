@@ -25,6 +25,8 @@ public class UserController {
     }
 
 
+
+
     @PostMapping
     public void addNewUser(@RequestBody User u) throws IllegalAccessException {
         userService.addNewUser(u);
