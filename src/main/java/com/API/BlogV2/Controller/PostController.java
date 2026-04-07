@@ -1,5 +1,6 @@
 package com.API.BlogV2.Controller;
 
+import com.API.BlogV2.DTO.PostDTO;
 import com.API.BlogV2.Entity.Post;
 import com.API.BlogV2.Service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ public class PostController {
     }
 
     @GetMapping
-    public Page<Post> getAllPostsByUser(
+    public Page<PostDTO> getAllPostsByUser(
             @PathVariable("userId") Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size

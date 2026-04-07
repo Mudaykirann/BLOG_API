@@ -19,18 +19,27 @@ public class Post {
     private Long id;
     private String title;
     private String content;
+    private String author;
 
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 
     public Post(){
     }
 
-    public Post(String title, String content) {
+    public Post(String title, String content,String author) {
         this.title = title;
         this.content = content;
+        this.author=author;
     }
 
     public Long getId() {
