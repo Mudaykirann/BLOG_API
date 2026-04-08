@@ -1,9 +1,10 @@
 package com.API.BlogV2.Controller;
 
 import com.API.BlogV2.DTO.UserDTO;
-import com.API.BlogV2.Entity.User;
+import com.API.BlogV2.Exception.ApiResponse;
 import com.API.BlogV2.Service.UserService;
 import jakarta.validation.Valid;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,19 +25,26 @@ public class UserController {
 
 
     @GetMapping
-    public List<UserDTO> getAllUsers() throws IllegalAccessException{
-        return userService.getAllUser();
+    public ApiResponse<List<UserDTO>> getAllUsers() throws IllegalAccessException{
+        List<UserDTO> users =  userService.getAllUser();
+        return new ApiResponse<>("success","Users Fetched",users);
     }
 
     @GetMapping(path = "/{id}")
-    public UserDTO getUserDetails(@PathVariable("id") Long id) { // Change void to UserDTO
-        return userService.getUserDetails(id); // Added 'return'
+    public ApiResponse<UserDTO> getUserDetails(@PathVariable("id") Long id) { // Change void to UserDTO
+        UserDTO user =  userService.getUserDetails(id); // Added 'return'
+        return new ApiResponse<>(
+                "success",
+                "User fetched successfully",
+                user
+        );
     }
 
 
     @PostMapping
-    public void addNewUser(@Valid @RequestBody UserDTO u) {
+    public ApiResponse<Void> addNewUser(@Valid @RequestBody UserDTO u) {
         userService.addNewUser(u);
+        return new ApiResponse<>("success", "User created successfully", null);
     }
 
 }
