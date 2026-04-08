@@ -1,8 +1,10 @@
 package com.API.BlogV2.Controller;
 
 import com.API.BlogV2.DTO.PostDTO;
+import com.API.BlogV2.DTO.PostRequestDTO;
 import com.API.BlogV2.Entity.Post;
 import com.API.BlogV2.Service.PostService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +33,7 @@ public class PostController {
     }
 
     @PostMapping
-    public void addNewPost(@PathVariable("userId") Long userId,@RequestBody Post p) throws IllegalAccessException{
+    public void addNewPost(@PathVariable("userId") Long userId,@Valid @RequestBody PostRequestDTO p) throws IllegalAccessException{
         postService.addNewPostWithUser(userId,p);
     }
 

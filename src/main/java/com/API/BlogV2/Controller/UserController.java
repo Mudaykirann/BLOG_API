@@ -1,9 +1,13 @@
 package com.API.BlogV2.Controller;
 
+import com.API.BlogV2.DTO.UserDTO;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -20,15 +24,18 @@ public class UserController {
 
 
     @GetMapping
-    public void getAllUsers(){
-        userService.getAllUser();
+    public List<UserDTO> getAllUsers() throws IllegalAccessException{
+        return userService.getAllUser();
+    }
+
+    @GetMapping(path = "/{id}")
+    public UserDTO getUserDetails(@PathVariable("id") Long id) { // Change void to UserDTO
+        return userService.getUserDetails(id); // Added 'return'
     }
 
 
-
-
     @PostMapping
-    public void addNewUser(@RequestBody User u) throws IllegalAccessException {
+    public void addNewUser(@Valid @RequestBody UserDTO u) {
         userService.addNewUser(u);
     }
 

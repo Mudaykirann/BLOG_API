@@ -2,6 +2,7 @@ package com.API.BlogV2.Service;
 
 import com.API.BlogV2.DTO.PostDTO;
 import com.API.BlogV2.DTO.PostMapper;
+import com.API.BlogV2.DTO.PostRequestDTO;
 import com.API.BlogV2.Entity.Post;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Repository.PostRepository;
@@ -33,11 +34,14 @@ public class PostService {
     }
 
 
-    public void addNewPostWithUser(Long userId, Post p) {
+    public void addNewPostWithUser(Long userId, PostRequestDTO postRequestDTO) {
         // Standard JpaRepository uses findById
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalStateException("User " + userId + " does not exist"));
 
+        Post p = new Post();
+        p.setTitle(postRequestDTO.getTitle());
+        p.setAuthor(postRequestDTO.getAuthor());
         p.setUser(user); // Now passing the User object, not the Optional
         postRepository.save(p);
     }
@@ -48,7 +52,7 @@ public class PostService {
 
         Page<Post> postPage = postRepository.findByUserId(userId,pageable);
 
-        // this is where DTO comes into picture , observer the mapToDTO method
+        // this is where DTO comes into picture , observer the mapToDTO
         return postPage.map(post -> postMapper.mapToDTO(post));
     }
 
