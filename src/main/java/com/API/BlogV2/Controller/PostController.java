@@ -3,6 +3,7 @@ package com.API.BlogV2.Controller;
 import com.API.BlogV2.DTO.PostDTO;
 import com.API.BlogV2.DTO.PostRequestDTO;
 import com.API.BlogV2.Entity.Post;
+import com.API.BlogV2.Exception.ApiResponse;
 import com.API.BlogV2.Service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +25,19 @@ public class PostController {
     }
 
     @GetMapping
-    public Page<PostDTO> getAllPostsByUser(
+    public ApiResponse<Page<PostDTO>> getAllPostsByUser(
             @PathVariable("userId") Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {
-        return postService.getPostsByUserId(userId,page,size);
+        Page<PostDTO> posts = postService.getPostsByUserId(userId,page,size);
+        return new ApiResponse<>("success","Posts fetched successfully",posts);
     }
 
     @PostMapping
-    public void addNewPost(@PathVariable("userId") Long userId,@Valid @RequestBody PostRequestDTO p) throws IllegalAccessException{
+    public ApiResponse<Void> addNewPost(@PathVariable("userId") Long userId,@Valid @RequestBody PostRequestDTO p) throws IllegalAccessException{
         postService.addNewPostWithUser(userId,p);
+        return new ApiResponse<>("success", "Post created successfully", null);
     }
 
 //    @PutMapping(path="{postid}")
