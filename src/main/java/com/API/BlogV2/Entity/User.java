@@ -21,6 +21,8 @@ public class User {
     private Long id;
     private String name;
     private String email;
+    private String password;
+    private String occupation;
 
 
 
@@ -29,9 +31,11 @@ public class User {
 
     public User(){}
 
-    public User(String name, String email) {
+    public User(String name, String email,String password,String occupation) {
         this.name = name;
         this.email = email;
+        this.password = password;
+        this.occupation = occupation;
     }
 
     public String getEmail() {
@@ -56,5 +60,21 @@ public class User {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getOccupation() {
+        return occupation;
+    }
+
+    public void setOccupation(String occupation) {
+        this.occupation = occupation;
     }
 }
