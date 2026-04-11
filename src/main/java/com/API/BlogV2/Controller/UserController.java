@@ -1,10 +1,10 @@
 package com.API.BlogV2.Controller;
 
 import com.API.BlogV2.DTO.UserDTO;
+import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Exception.ApiResponse;
 import com.API.BlogV2.Service.UserService;
 import jakarta.validation.Valid;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,11 +40,16 @@ public class UserController {
         );
     }
 
+    @PostMapping(path="/login")
+    public String login(@RequestBody User u){
+        return userService.verifyUser(u);
+    }
 
-    @PostMapping
-    public ApiResponse<Void> addNewUser(@Valid @RequestBody UserDTO u) {
-        userService.addNewUser(u);
-        return new ApiResponse<>("success", "User created successfully", null);
+
+    @PostMapping(path = "/register")
+    public ApiResponse<Void> registerUser(@Valid @RequestBody User u) {
+        userService.registerUser(u);
+        return new ApiResponse<>("success", "User Registered successfully", null);
     }
 
 }

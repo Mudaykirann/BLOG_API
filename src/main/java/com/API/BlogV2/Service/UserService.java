@@ -5,6 +5,10 @@ import com.API.BlogV2.DTO.UserMapper;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,14 +23,26 @@ public class UserService {
 
 
     @Autowired
+    AuthenticationManager authenticationManager;
+
+
+    @Autowired
+    private  JWTService jwtService;
+
+
+
+    // TO encrypt the password given by the users
+    private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
+
+    @Autowired
     public UserService(UserRepository userRepository,UserMapper userMapper) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
     }
 
-    public void addNewUser(UserDTO u) {
-        User user = userMapper.mapToEntity(u);
-        userRepository.save(user);
+    public void registerUser(User u) {
+        u.setPassword(bCryptPasswordEncoder.encode(u.getPassword()));
+        userRepository.save(u);
     }
 
     public UserDTO getUserDetails(Long id) {
@@ -48,4 +64,14 @@ public class UserService {
                 .toList();
     }
 
+    public String verifyUser(User u) {
+        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(u.getName(),u.getPassword()));
+
+        if(auth.isAuthenticated()){
+            return jwtService.generateToken(u.getName());
+        }
+
+        return "Fail";
+
+    }
 }
