@@ -11,6 +11,7 @@ public class PostMapper {
         PostDTO postDTO = new PostDTO();
         postDTO.setTitle(p.getTitle());
         postDTO.setAuthor(p.getAuthor());
+        postDTO.setContent(p.getContent());
 
         return postDTO;
     }

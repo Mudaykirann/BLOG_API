@@ -8,13 +8,14 @@ import com.API.BlogV2.Service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 
 @RestController
-@RequestMapping(path = "api/v1/users/{userId}/posts")
+@RequestMapping(path = "api/posts")
 public class PostController {
 
     private final PostService postService;
@@ -24,7 +25,19 @@ public class PostController {
         this.postService = postService;
     }
 
-    @GetMapping
+
+    @GetMapping(path = "/all")
+    public ApiResponse<Page<PostDTO>> getAllPosts(
+
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ){
+        Page<PostDTO> allPosts = postService.getAllPosts(page,size);
+        return  new ApiResponse<>("success","All Posts are Fetched successfully",allPosts);
+    }
+
+    @GetMapping(path = "{userId}/all")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<Page<PostDTO>> getAllPostsByUser(
             @PathVariable("userId") Long userId,
             @RequestParam(defaultValue = "0") int page,
@@ -34,7 +47,8 @@ public class PostController {
         return new ApiResponse<>("success","Posts fetched successfully",posts);
     }
 
-    @PostMapping
+    @PostMapping(path = "/{userId}/new")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #userId == authentication.principal.id)")
     public ApiResponse<Void> addNewPost(@PathVariable("userId") Long userId,@Valid @RequestBody PostRequestDTO p) throws IllegalAccessException{
         postService.addNewPostWithUser(userId,p);
         return new ApiResponse<>("success", "Post created successfully", null);
@@ -45,6 +59,7 @@ public class PostController {
 //        postService.updatePost(id,p);
 //    }
 //    @DeleteMapping(path = "{postid}")
+//    @PreAuthorize("hasRole('ADMIN')")
 //    public void deletePost(@PathVariable("postid") Long id){
 //        postService.deletePost(id);
 //    }

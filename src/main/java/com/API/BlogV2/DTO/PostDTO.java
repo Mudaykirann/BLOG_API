@@ -18,6 +18,15 @@ public class PostDTO {
 
     private String title;
     private String author;
+    private String content;
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 
     public String getTitle() {
         return title;
