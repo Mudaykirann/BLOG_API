@@ -42,6 +42,7 @@ public class PostService {
         Post p = new Post();
         p.setTitle(postRequestDTO.getTitle());
         p.setAuthor(postRequestDTO.getAuthor());
+        p.setContent(postRequestDTO.getContent());
         p.setUser(user); // Now passing the User object, not the Optional
         postRepository.save(p);
     }
@@ -51,6 +52,18 @@ public class PostService {
         Pageable pageable = PageRequest.of(page,size, Sort.by("id").descending());
 
         Page<Post> postPage = postRepository.findByUserId(userId,pageable);
+
+        // this is where DTO comes into picture , observer the mapToDTO
+        return postPage.map(post -> postMapper.mapToDTO(post));
+    }
+
+
+    public Page<PostDTO> getAllPosts(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page,size, Sort.by("id").descending());
+
+        //Page<Post> postPage = postRepository.findByUserId(userId,pageable);
+        Page<Post> postPage = postRepository.findAll(pageable);
 
         // this is where DTO comes into picture , observer the mapToDTO
         return postPage.map(post -> postMapper.mapToDTO(post));
