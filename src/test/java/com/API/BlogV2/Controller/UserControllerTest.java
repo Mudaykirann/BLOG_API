@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 // USE THESE INSTEAD
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -105,4 +106,28 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("token123"));
     }
+    @Test
+    void testRegister() throws Exception {
+
+        //because it doesn't return any value
+        doNothing().when(userService).registerUser(any(User.class));
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+            {
+                "name": "mohan",
+                "email": "mohan@gmail.com",
+                "occupation": "barber",
+                "password": "m@123",
+                "role":"ADMIN"
+            }
+        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message")
+                        .value("User Registered successfully"))
+                .andExpect(jsonPath("$.status")
+                        .value("success"));
+    }
+
 }
