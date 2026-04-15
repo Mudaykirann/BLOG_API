@@ -1,5 +1,6 @@
 package com.API.BlogV2.DTO;
 
+import com.API.BlogV2.Entity.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 

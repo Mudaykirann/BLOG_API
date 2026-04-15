@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 
@@ -54,13 +55,18 @@ public class PostController {
         return new ApiResponse<>("success", "Post created successfully", null);
     }
 
-//    @PutMapping(path="{postid}")
-//    public void updatePost(@PathVariable("postid") Long id , @RequestBody Post p){
-//        postService.updatePost(id,p);
-//    }
-//    @DeleteMapping(path = "{postid}")
-//    @PreAuthorize("hasRole('ADMIN')")
-//    public void deletePost(@PathVariable("postid") Long id){
-//        postService.deletePost(id);
-//    }
+    @PutMapping(path="/{postid}")
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<Void> updatePost(@PathVariable("postid") Long id, @RequestBody PostRequestDTO p) throws AccessDeniedException {
+        postService.updatePost(id, p);
+        return new ApiResponse<>("success", "Post Updated successfully", null);
+    }
+
+
+    @DeleteMapping(path = "/{postid}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #userId == authentication.principal.id)")
+    public ApiResponse<Void> deletePost(@PathVariable("postid") Long id){
+        postService.deletePost(id);
+        return new ApiResponse<>("success", "Post Deleted successfully", null);
+    }
 }
