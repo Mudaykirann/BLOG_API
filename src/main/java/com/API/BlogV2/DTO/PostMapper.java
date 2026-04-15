@@ -16,4 +16,14 @@ public class PostMapper {
         return postDTO;
     }
 
+    public Post mapToEntity (PostDTO p){
+
+        Post post = new Post();
+        post.setTitle(p.getTitle());
+        post.setAuthor(p.getAuthor());
+        post.setContent(p.getContent());
+
+        return post;
+    }
+
 }
