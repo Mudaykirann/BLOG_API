@@ -142,12 +142,11 @@ Authorization: Bearer <your_token>
 |---|---|---|---|
 | `GET` | `/api/posts/{postId}/comments` | ❌ | Get all comments for a post |
 | `POST` | `/api/posts/{postId}/comments` | ✅ | Add a comment to a post |
-| `DELETE` | `/api/posts/{postId}/comments/{id}` | ✅ | Delete a comment |
 
 ### Pagination Example
 
 ```
-GET /api/posts?page=0&size=10&sortBy=createdAt&sortDir=desc
+GET /api/posts?page=0&size=10
 ```
 
 ---
@@ -160,17 +159,17 @@ GET /api/posts?page=0&size=10&sortBy=createdAt&sortDir=desc
 ```json
 POST /api/auth/login
 {
-  "email": "user@example.com",
-  "password": "password123"
+    "name": "mohan",
+    "email": "mohan@gmail.com",
+    "occupation": "barber",
+    "password": "m@123",
+    "role":"ADMIN"
 }
 ```
 
 **Response:**
 ```json
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9...",
-  "tokenType": "Bearer"
-}
+eyJhbGciOiJIUzI1NiJ9.....
 ```
 
 ### Create Post
@@ -181,20 +180,19 @@ POST /api/posts
 Authorization: Bearer <token>
 
 {
-  "title": "My First Blog Post",
-  "content": "This is the content of my blog post.",
-  "category": "Technology"
+    "user_id":1,
+    "author":"Mohan Ranga",
+    "content":"THis is the First Blog Post Featured here. with user id - 1",
+    "title":"Blog Post -1 by userid-1"
 }
 ```
 
 **Response:**
 ```json
 {
-  "id": 1,
-  "title": "My First Blog Post",
-  "content": "This is the content of my blog post.",
-  "category": "Technology",
-  "createdAt": "2026-04-16T10:00:00"
+    "status": "success",
+    "message": "Post created successfully",
+    "data": null
 }
 ```
 
@@ -209,7 +207,7 @@ Authorization: Bearer <token>
 ---
 
 ## 🔮 Roadmap -- Features need to be Added.
-
+- [ ] Need to Refine the Response Object
 - [ ] Add category filtering and tag support
 - [ ] Image upload for blog posts
 - [ ] Email verification on registration
