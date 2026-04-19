@@ -100,7 +100,7 @@ app.jwt.expiration=86400000
 ./mvnw spring-boot:run
 ```
 
-The API will start at `http://localhost:8080`
+The API will start at `http://localhost:8083`
 
 ---
 
@@ -126,13 +126,23 @@ Authorization: Bearer <your_token>
 | `POST` | `/api/auth/register` | Register a new user |
 | `POST` | `/api/auth/login` | Login and receive JWT token |
 
+### Users
+
+| Method | Endpoint | Auth Required | Description |
+|---|---|---|---|
+| `GET` | `/api/users` | ✅ | Get all Users |
+| `GET` | `/api/users/{id}` | ✅ | Get the User by ID |
+| `PUT` | `/api/users/{id}` | ✅ | Update the User Details |
+| `DELETE` | `/api/users/{id}` | ✅ | Delete the User |
+
+
 ### Posts
 
 | Method | Endpoint | Auth Required | Description |
 |---|---|---|---|
-| `GET` | `/api/posts` | ❌ | Get all posts (paginated) |
-| `GET` | `/api/posts/{id}` | ❌ | Get post by ID |
-| `POST` | `/api/posts` | ✅ | Create a new post |
+| `GET` | `/api/posts/all` | ❌ | Get all posts (paginated) |
+| `GET` | `/api/posts/{id}/all` | ❌ | Get all post by ID |
+| `POST` | `/api/posts/{id}/new` | ✅ | Create a new post |
 | `PUT` | `/api/posts/{id}` | ✅ | Update a post |
 | `DELETE` | `/api/posts/{id}` | ✅ | Delete a post |
 
@@ -142,6 +152,8 @@ Authorization: Bearer <your_token>
 |---|---|---|---|
 | `GET` | `/api/posts/{postId}/comments` | ❌ | Get all comments for a post |
 | `POST` | `/api/posts/{postId}/comments` | ✅ | Add a comment to a post |
+| `PUT` | `/api/posts/{postId}/comments{commentId}` | ✅ | Update a comment to a post |
+| `DELETE` | `/api/posts/{postId}/comments/{commentId}` | ✅ | Delete a comment to a post |
 
 ### Pagination Example
 
