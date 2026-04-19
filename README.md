@@ -6,6 +6,9 @@ A production-ready **RESTful Blog API** built with **Java 17**, **Spring Boot 4*
 ![In Progress](https://img.shields.io/badge/Status-In%20Progress-green?style=flat-square)
 ![REST API](https://img.shields.io/badge/Type-REST%20API-blue?style=flat-square)
 ![MIT License](https://img.shields.io/badge/License-MIT-blueviolet?style=flat-square)
+![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)
+![Springboot](https://img.shields.io/badge/Spring%20Boot-4.0.5-brightgreen?style=flat-square&logo=springboot)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-blue?style=flat-square&logo=postgresql)
 
 
 > Built as a backend portfolio project to demonstrate real-world API design with Spring Boot and Spring Security.
