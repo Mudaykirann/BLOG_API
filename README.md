@@ -83,15 +83,16 @@ CREATE DATABASE blogdb;
 Update `src/main/resources/application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/blogdb
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-
-spring.jpa.hibernate.ddl-auto=update
+spring.application.name=BlogV2
+spring.datasource.url=jdbc:postgresql://localhost:5433/BlogV2Testing
+spring.datasource.username=username
+spring.datasource.password=password
+spring.jpa.hibernate.ddl-auto=create-drop
 spring.jpa.show-sql=true
-
-app.jwt.secret=your_jwt_secret_key
-app.jwt.expiration=86400000
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.format_sql=true
+server.error.include-message=always
+server.port=8083
 ```
 
 ### 3. Build and run
