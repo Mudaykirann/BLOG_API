@@ -48,12 +48,13 @@ A production-ready **RESTful Blog API** built with **Java 17**, **Spring Boot 4*
 src/
 ├── main/
 │   ├── java/com/API/BlogV2/
-│   │   ├── controller/      # REST controllers (Auth, Post, Comment)
-│   │   ├── dto/             # Request/Response DTOs
-│   │   ├── entity/          # JPA Entities
-│   │   ├── repository/      # Spring Data JPA repositories
-│   │   ├── security/        # JWT filter, UserDetailsService, config
-│   │   └── service/         # Business logic
+│   │   ├── Controller/      # REST controllers (Auth, Post, Comment)
+│   │   ├── DTO/             # Request/Response DTOs
+│   │   ├── Entity/          # JPA Entities
+│   │   ├── Repository/      # Spring Data JPA repositories
+│   │   ├── Utils/           # JWT filter, UserDetailsService, config
+│   │   └── Service/         # Business logic
+│   │   └── Exception/       # Global Exceptions
 │   └── resources/
 │       └── application.properties
 ```
