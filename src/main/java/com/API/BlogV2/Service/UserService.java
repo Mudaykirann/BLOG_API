@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 
@@ -56,7 +57,6 @@ public class UserService {
     // In the getUserDetails method, the findById returns an Optional<User>.
     // The .map() function on an Optional is very clever: if the user exists, it runs the mapper;
     // if the user is missing, it does nothing and allows the .orElseThrow() to trigger.
-
     public List<UserDTO> getAllUser() {
         return userRepository.findAll()
                 .stream()
@@ -72,6 +72,20 @@ public class UserService {
         }
 
         return "Fail";
+    }
 
+    public void deleteUser(Long id){
+        User user = userRepository.findById(id)
+                        .orElseThrow(() -> new NoSuchElementException("User not found"));
+        userRepository.deleteById(id);
+    }
+
+    public  void updateUser(Long id,UserDTO userDTO){
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+        user.setEmail(userDTO.getEmail());
+        user.setName(userDTO.getName());
+        user.setOccupation(userDTO.getOccupation());
+        userRepository.save(user);
     }
 }

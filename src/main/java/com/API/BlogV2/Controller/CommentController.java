@@ -25,6 +25,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
+    //get comments
     @GetMapping(path = "/{post_id}/comments")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<List<Comment>> getCommentsByPostId(
@@ -34,6 +35,8 @@ public class CommentController {
         return new ApiResponse<>("success", "Comments Fetched successfully", comments);
     }
 
+
+    //create comments
     @PostMapping(path = "/{post_id}/comments")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Simple check; ID is handled inside
     public ApiResponse<Void> addNewComment(
@@ -45,6 +48,37 @@ public class CommentController {
         String content = requestBody.get("content");
         commentService.addComment(post_id, principal.getId(), content);
         return new ApiResponse<>("success", "Comment Added successfully", null);
+    }
+
+
+    @PutMapping(path = "/{post_id}/comments/{comment_id}")
+    @PreAuthorize("hasRole('USER')")
+    public ApiResponse<Void> updateComment(
+            @PathVariable("post_id") Long post_id,
+            @PathVariable("comment_id") Long comment_id,
+            @RequestBody Map<String, String> requestBody
+    ){
+        UserPrincple principal = (UserPrincple) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+
+        String newContent = requestBody.get("content");
+
+        commentService.updateComment(post_id, principal.getId(), comment_id, newContent);
+
+        return new ApiResponse<>("success", "Comment updated successfully", null);
+    }
+
+    @DeleteMapping(path = "/{post_id}/comments/{comment_id}")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Simple check; ID is handled inside
+    public ApiResponse<Void> deleteComment(
+            @PathVariable("post_id") Long post_id,
+            @PathVariable("comment_id") Long comment_id
+    ){
+
+        UserPrincple principal = (UserPrincple) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        commentService.deleteComment(post_id,principal.getId(),comment_id);
+        return new ApiResponse<>("success", "Comment Deleted successfully", null);
     }
 
 }

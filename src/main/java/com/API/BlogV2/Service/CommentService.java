@@ -47,4 +47,56 @@ public class CommentService {
         comment.setUser(user);
         commentRepository.save(comment);
     }
+
+    @Transactional
+    public void updateComment(Long postId, Long userId, Long commentId, String newContent) {
+
+        if (!postRepository.existsById(postId)) {
+            throw new NoSuchElementException("Post not found");
+        }
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NoSuchElementException("Comment not found"));
+
+        //Verify Comment belongs to the Post
+        if (!comment.getPost().getId().equals(postId)) {
+            throw new IllegalArgumentException("Comment-Post mismatch");
+        }
+
+        // Only the creator can edit
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new IllegalStateException("You can only edit your own comments");
+        }
+
+        comment.setContent(newContent);
+    }
+
+
+    @Transactional
+    public void deleteComment(Long postId, Long userId,Long commentId){
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new NoSuchElementException("Post not found"));
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NoSuchElementException("Comment not found"));
+
+        //checking whether this comment is belong to this post or not
+        if (!comment.getPost().getId().equals(postId)) {
+            throw new IllegalArgumentException("Comment does not belong to this post");
+        }
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+        boolean isOwner = comment.getUser().getId().equals(userId);
+        boolean isAdmin = user.getRole().name().equals("ADMIN");
+
+        if (!isOwner && !isAdmin) {
+            throw new IllegalStateException("You are not authorized to delete this comment");
+        }
+
+        // 5. Perform deletion
+        commentRepository.delete(comment);
+
+
+    }
 }
