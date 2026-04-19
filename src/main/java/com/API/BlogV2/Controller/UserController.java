@@ -7,6 +7,7 @@ import com.API.BlogV2.Exception.ApiResponse;
 import com.API.BlogV2.Service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,7 +34,7 @@ public class UserController {
         return new ApiResponse<>("success","Users Fetched",users);
     }
 
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "/users/{id}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ApiResponse<UserDTO> getUserDetails(@PathVariable("id") Long id) { // Change void to UserDTO
         UserDTO user =  userService.getUserDetails(id); // Added 'return'
@@ -60,4 +61,17 @@ public class UserController {
         return new ApiResponse<>("success", "User Registered successfully", null);
     }
 
+    @DeleteMapping(path = "/users/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #userId == authentication.principal.id)")
+    public ApiResponse<Void> deleteUser(@PathVariable("userId") Long id){
+        userService.deleteUser(id);
+        return new ApiResponse<>("success", "User Deleted successfully", null);
+    }
+
+    @PutMapping(path = "/users/{id}")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #userId == authentication.principal.id)")
+    public ApiResponse<Void> updateUser(@PathVariable("userId") Long id , @RequestBody UserDTO userDTO) throws AccessDeniedException {
+        userService.updateUser(id,userDTO);
+        return new ApiResponse<>("Success","User Updated Successfully",null);
+    }
 }

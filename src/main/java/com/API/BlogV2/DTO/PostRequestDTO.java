@@ -15,6 +15,8 @@ public class PostRequestDTO {
     private String author;
 
 
+
+
     @NotBlank(message = "content is required")
     @Size(min=10,max=500,message = "Content must be between 10 and 500 characters")
     private String content;

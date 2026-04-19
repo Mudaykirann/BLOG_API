@@ -12,13 +12,28 @@ package com.API.BlogV2.DTO;
 //        ↓
 //        DTO
 
+import com.API.BlogV2.Entity.Comment;
 import com.API.BlogV2.Entity.Post;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PostDTO {
 
     private String title;
     private String author;
     private String content;
+
+    private List<Comment> comments = new ArrayList<>();
+
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
 
     public String getContent() {
         return content;
