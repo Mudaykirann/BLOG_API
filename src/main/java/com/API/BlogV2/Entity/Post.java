@@ -1,6 +1,7 @@
 package com.API.BlogV2.Entity;
 
 import jakarta.persistence.*;
+import org.apache.logging.log4j.util.Lazy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +29,7 @@ public class Post {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL,fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
 

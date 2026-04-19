@@ -1,5 +1,6 @@
 package com.API.BlogV2.Service;
 
+import com.API.BlogV2.DTO.CommentDTO;
 import com.API.BlogV2.DTO.PostDTO;
 import com.API.BlogV2.DTO.PostMapper;
 import com.API.BlogV2.DTO.PostRequestDTO;
@@ -8,6 +9,7 @@ import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Entity.UserPrincple;
 import com.API.BlogV2.Repository.PostRepository;
 import com.API.BlogV2.Repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +23,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -51,6 +54,7 @@ public class PostService {
         p.setUser(user); // Now passing the User object, not the Optional
         postRepository.save(p);
     }
+
 
     public Page<PostDTO> getPostsByUserId(Long userId, int page, int size) {
 
