@@ -1,5 +1,7 @@
 package com.API.BlogV2.Service;
 
+import com.API.BlogV2.DTO.CommentDTO;
+import com.API.BlogV2.DTO.PostMapper;
 import com.API.BlogV2.Entity.Comment;
 import com.API.BlogV2.Entity.Post;
 import com.API.BlogV2.Entity.User;
@@ -12,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentService {
@@ -25,13 +28,21 @@ public class CommentService {
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private PostMapper postMapper;
 
-    public List<Comment> getAllComments(Long post_id) {
+
+    public List<CommentDTO> getAllComments(Long post_id) {
         if (!postRepository.existsById(post_id)) {
             throw new NoSuchElementException("Post not found");
         }
         // Match the new repository method name
-        return commentRepository.findByPost_Id(post_id);
+        List<Comment> comments =  commentRepository.findByPost_Id(post_id);
+
+        return comments.stream()
+                .map(postMapper::commentToCommentDTO)
+                .collect(Collectors.toList());
+
     }
 
 

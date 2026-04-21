@@ -56,6 +56,7 @@ public class PostService {
     }
 
 
+    @Transactional  // ensures the session stays open to fetch lazy-loaded comments
     public Page<PostDTO> getPostsByUserId(Long userId, int page, int size) {
 
         Pageable pageable = PageRequest.of(page,size, Sort.by("id").descending());
@@ -63,10 +64,11 @@ public class PostService {
         Page<Post> postPage = postRepository.findByUserId(userId,pageable);
 
         // this is where DTO comes into picture , observer the mapToDTO
-        return postPage.map(post -> postMapper.mapToDTO(post));
+        return postPage.map(postMapper::mapToDTO);
     }
 
 
+    @Transactional
     public Page<PostDTO> getAllPosts(int page, int size) {
 
         Pageable pageable = PageRequest.of(page,size, Sort.by("id").descending());
@@ -75,9 +77,10 @@ public class PostService {
         Page<Post> postPage = postRepository.findAll(pageable);
 
         // this is where DTO comes into picture , observer the mapToDTO
-        return postPage.map(post -> postMapper.mapToDTO(post));
+        return postPage.map(postMapper::mapToDTO);
     }
 
+    @Transactional
     public void updatePost(Long id , PostRequestDTO p) throws AccessDeniedException {
         // 1. Fetch the post (The "Real" Entity)
         Post post = postRepository.findById(id)
