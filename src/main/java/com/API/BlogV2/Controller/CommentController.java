@@ -1,11 +1,10 @@
 package com.API.BlogV2.Controller;
 
 
+import com.API.BlogV2.DTO.CommentDTO;
 import com.API.BlogV2.Entity.Comment;
 import com.API.BlogV2.Entity.UserPrincple;
-import com.API.BlogV2.Exception.ApiResponse;
 import com.API.BlogV2.Exception.UnifiedResponse;
-import com.API.BlogV2.Repository.CommentRepository;
 import com.API.BlogV2.Service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,10 +29,10 @@ public class CommentController {
     //get comments
     @GetMapping(path = "/{post_id}/comments")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
-    public ResponseEntity<UnifiedResponse<List<Comment>>> getCommentsByPostId(
+    public ResponseEntity<UnifiedResponse<List<CommentDTO>>> getCommentsByPostId(
             @PathVariable("post_id") Long post_id
     ){
-        List<Comment> comments  = commentService.getAllComments(post_id);
+        List<CommentDTO> comments  = commentService.getAllComments(post_id);
         return ResponseEntity.ok(UnifiedResponse.ok( "Comments Fetched successfully", comments));
     }
 

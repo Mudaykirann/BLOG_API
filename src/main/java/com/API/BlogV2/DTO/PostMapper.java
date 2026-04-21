@@ -1,42 +1,26 @@
 package com.API.BlogV2.DTO;
 
-
+import com.API.BlogV2.Entity.Comment;
 import com.API.BlogV2.Entity.Post;
-import org.springframework.stereotype.Service;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+import org.springframework.context.annotation.Bean;
 
-import java.util.List;
-import java.util.stream.Collectors;
+@Mapper(componentModel = "spring") // This makes it a Spring Bean (@Component)
+public interface PostMapper {
 
-@Service
-public class PostMapper {
+    // 1. Map Entity to DTO
+    PostDTO mapToDTO(Post post);
 
-    public PostDTO mapToDTO(Post post) {
-        PostDTO dto = new PostDTO();
-        dto.setTitle(post.getTitle());
-        dto.setContent(post.getContent());
-        dto.setAuthor(post.getAuthor());
+    // 2. Map DTO back to Entity
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "comments", ignore = true)
+    Post mapToEntity(PostDTO postDTO);
 
-        if (post.getComments() != null) {
-            List<CommentDTO> commentDtos = post.getComments().stream()
-                    .map(comment -> new CommentDTO(
-                            comment.getContent(),
-                            comment.getUser().getId(),
-                            comment.getPost().getId()
-                    ))
-                    .collect(Collectors.toList());
-            dto.setComments(commentDtos);
-        }
-        return dto;
-    }
-
-    public Post mapToEntity (PostDTO p){
-
-        Post post = new Post();
-        post.setTitle(p.getTitle());
-        post.setAuthor(p.getAuthor());
-        post.setContent(p.getContent());
-
-        return post;
-    }
-
+    // 3. Helper to map individual Comments within the list
+    @Mapping(target = "userId", source = "user.id") //source is for telling the bean to go deep into the user to get the id
+    @Mapping(target = "postId", source = "post.id")
+    CommentDTO commentToCommentDTO(Comment comment);
 }

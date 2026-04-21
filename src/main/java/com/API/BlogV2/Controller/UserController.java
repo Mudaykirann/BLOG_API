@@ -3,7 +3,6 @@ package com.API.BlogV2.Controller;
 import com.API.BlogV2.DTO.UserDTO;
 import com.API.BlogV2.Entity.Role;
 import com.API.BlogV2.Entity.User;
-import com.API.BlogV2.Exception.ApiResponse;
 import com.API.BlogV2.Exception.UnifiedResponse;
 import com.API.BlogV2.Service.UserService;
 import jakarta.validation.Valid;

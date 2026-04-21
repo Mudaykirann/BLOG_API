@@ -2,8 +2,6 @@ package com.API.BlogV2.Controller;
 
 import com.API.BlogV2.DTO.PostDTO;
 import com.API.BlogV2.DTO.PostRequestDTO;
-import com.API.BlogV2.Entity.Post;
-import com.API.BlogV2.Exception.ApiResponse;
 import com.API.BlogV2.Exception.UnifiedResponse;
 import com.API.BlogV2.Service.PostService;
 import jakarta.validation.Valid;
@@ -15,7 +13,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
-import java.util.List;
 
 
 @RestController
