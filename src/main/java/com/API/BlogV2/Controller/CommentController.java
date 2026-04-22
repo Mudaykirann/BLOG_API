@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(path = "api/posts")
+@RequestMapping(path = "api/v1")
 public class CommentController {
 
     private CommentService commentService;
@@ -27,35 +27,34 @@ public class CommentController {
     }
 
     //get comments
-    @GetMapping(path = "/{post_id}/comments")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @GetMapping(path = "/posts/{postId}/comments")
     public ResponseEntity<UnifiedResponse<List<CommentDTO>>> getCommentsByPostId(
-            @PathVariable("post_id") Long post_id
+            @PathVariable("postId") Long postId
     ){
-        List<CommentDTO> comments  = commentService.getAllComments(post_id);
+        List<CommentDTO> comments  = commentService.getAllComments(postId);
         return ResponseEntity.ok(UnifiedResponse.ok( "Comments Fetched successfully", comments));
     }
 
 
     //create comments
-    @PostMapping(path = "/{post_id}/comments")
+    @PostMapping(path = "/posts/{postId}/comments")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Simple check; ID is handled inside
     public ResponseEntity<UnifiedResponse<Void>> addNewComment(
-            @PathVariable("post_id") Long post_id,
+            @PathVariable("postId") Long postId,
             @RequestBody Map<String ,String> requestBody
     ){
         UserPrincple principal = (UserPrincple) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
         String content = requestBody.get("content");
-        commentService.addComment(post_id, principal.getId(), content);
+        commentService.addComment(postId, principal.getId(), content);
         return ResponseEntity.ok(UnifiedResponse.ok( "Comment Added successfully", null));
     }
 
 
-    @PutMapping(path = "/{post_id}/comments/{comment_id}")
+    @PutMapping(path = "posts/{postId}/comments/{comment_id}")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UnifiedResponse<Void>> updateComment(
-            @PathVariable("post_id") Long post_id,
+            @PathVariable("postId") Long postId,
             @PathVariable("comment_id") Long comment_id,
             @RequestBody Map<String, String> requestBody
     ){
@@ -64,21 +63,21 @@ public class CommentController {
 
         String newContent = requestBody.get("content");
 
-        commentService.updateComment(post_id, principal.getId(), comment_id, newContent);
+        commentService.updateComment(postId, principal.getId(), comment_id, newContent);
 
         return ResponseEntity.ok(UnifiedResponse.ok( "Comment updated successfully", null));
     }
 
-    @DeleteMapping(path = "/{post_id}/comments/{comment_id}")
+    @DeleteMapping(path = "/posts/{postId}/comments/{commentId}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Simple check; ID is handled inside
     public ResponseEntity<UnifiedResponse<Void>> deleteComment(
-            @PathVariable("post_id") Long post_id,
-            @PathVariable("comment_id") Long comment_id
+            @PathVariable("postId") Long postId,
+            @PathVariable("commentId") Long commentId
     ){
 
         UserPrincple principal = (UserPrincple) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
-        commentService.deleteComment(post_id,principal.getId(),comment_id);
+        commentService.deleteComment(postId,principal.getId(),commentId);
         return ResponseEntity.ok(UnifiedResponse.ok( "Comment Deleted successfully", null));
     }
 

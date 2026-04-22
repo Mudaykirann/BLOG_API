@@ -40,15 +40,22 @@ public class SecurityConfig {
                 // Ensures that EVERY request sent to the server must be from an authenticated user
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(
-                                "/api/auth/register",
-                                "/api/auth/login",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/api/posts/all"
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/login",
+                                "/v1/api-docs/**",
+                                "/api/v1/posts"
                         )
                         .permitAll()
 
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/comments").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*/posts").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/*").permitAll()
 
                         // 2. Specific Post Rules (Nested paths should usually come first)
                         // Allows both USER and ADMIN to View (GET) and Create (POST) posts
