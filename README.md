@@ -88,10 +88,10 @@ Update `src/main/resources/application.properties`:
 
 ```properties
 spring.application.name=BlogV2
-spring.datasource.url=jdbc:postgresql://localhost:5433/BlogV2Testing
+spring.datasource.url=jdbc:postgresql://localhost:5433/DB_Name
 spring.datasource.username=username
 spring.datasource.password=password
-spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
@@ -124,46 +124,47 @@ Authorization: Bearer <your_token>
 
 ## 📡 API Endpoints
 
+> All endpoints are prefixed with `/api/v1`
+
 ### Auth
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/auth/register` | Register a new user |
-| `POST` | `/api/auth/login` | Login and receive JWT token |
+| `POST` | `/api/v1/auth/register` | Register a new user |
+| `POST` | `/api/v1/auth/login` | Login and receive JWT token |
 
 ### Users
 
 | Method | Endpoint | Auth Required | Description |
 |---|---|---|---|
-| `GET` | `/api/users` | ✅ | Get all Users |
-| `GET` | `/api/users/{id}` | ✅ | Get the User by ID |
-| `PUT` | `/api/users/{id}` | ✅ | Update the User Details |
-| `DELETE` | `/api/users/{id}` | ✅ | Delete the User |
-
+| `GET` | `/api/v1/users` | ✅ | Get all Users |
+| `GET` | `/api/v1/users/{id}` | ✅ | Get user details by ID |
+| `PUT` | `/api/v1/user/{id}` | ✅ | Update the User Details |
+| `DELETE` | `/api/v1/user/{id}` | ✅ | Delete the User |
 
 ### Posts
 
 | Method | Endpoint | Auth Required | Description |
 |---|---|---|---|
-| `GET` | `/api/posts/all` | ❌ | Get all posts (paginated) |
-| `GET` | `/api/posts/{id}/all` | ❌ | Get all post by ID |
-| `POST` | `/api/posts/{id}/new` | ✅ | Create a new post |
-| `PUT` | `/api/posts/{id}` | ✅ | Update a post |
-| `DELETE` | `/api/posts/{id}` | ✅ | Delete a post |
+| `GET` | `/api/v1/posts` | ❌ | Get all posts (paginated) |
+| `GET` | `/api/v1/users/{userId}/posts` | ❌ | Get all posts by a specific user |
+| `POST` | `/api/v1/users/{userId}/posts` | ✅ | Create a new post for a specific user |
+| `PUT` | `/api/v1/posts/{postId}` | ✅ | Update a post |
+| `DELETE` | `/api/v1/posts/{postId}` | ✅ | Delete a post |
 
 ### Comments
 
 | Method | Endpoint | Auth Required | Description |
 |---|---|---|---|
-| `GET` | `/api/posts/{postId}/comments` | ❌ | Get all comments for a post |
-| `POST` | `/api/posts/{postId}/comments` | ✅ | Add a comment to a post |
-| `PUT` | `/api/posts/{postId}/comments{commentId}` | ✅ | Update a comment to a post |
-| `DELETE` | `/api/posts/{postId}/comments/{commentId}` | ✅ | Delete a comment to a post |
+| `GET` | `/api/v1/posts/{postId}/comments` | ❌ | Get all comments for a post |
+| `POST` | `/api/v1/posts/{postId}/comments` | ✅ | Add a comment to a post |
+| `PUT` | `/api/v1/posts/{postId}/comments/{commentId}` | ✅ | Update a comment on a post |
+| `DELETE` | `/api/v1/posts/{postId}/comments/{commentId}` | ✅ | Delete a comment on a post |
 
 ### Pagination Example
 
 ```
-GET /api/posts?page=0&size=10
+GET /api/v1/posts?page=0&size=10
 ```
 
 ---
@@ -174,7 +175,7 @@ GET /api/posts?page=0&size=10
 
 **Request:**
 ```json
-POST /api/auth/login
+POST /api/v1/auth/login
 {
     "name": "mohan",
     "email": "mohan@gmail.com",
@@ -186,19 +187,24 @@ POST /api/auth/login
 
 **Response:**
 ```json
-eyJhbGciOiJIUzI1NiJ9.....
+{
+    "data": "eyJhbGciOiJIUzI1NiJ9............",
+    "message": "Token Fetched successfully",
+    "success": true,
+    "timestamp": "2026-04-22T11:37:20.967537"
+}
 ```
 
 ### Create Post
 
 **Request:**
 ```json
-POST /api/posts
+POST /api/v1/users/{userId}/posts
 Authorization: Bearer <token>
 
 {
-    "user_id":1,
-    "author":"Mohan Ranga",
+    "user_id":UserId,
+    "author":"John Doe",
     "content":"THis is the First Blog Post Featured here. with user id - 1",
     "title":"Blog Post -1 by userid-1"
 }
@@ -207,9 +213,9 @@ Authorization: Bearer <token>
 **Response:**
 ```json
 {
-    "status": "success",
     "message": "Post created successfully",
-    "data": null
+    "success": true,
+    "timestamp": "2026-04-22T11:39:10.3775333"
 }
 ```
 
@@ -224,7 +230,6 @@ Authorization: Bearer <token>
 ---
 
 ## 🔮 Roadmap -- Features need to be Added.
-- [ ] Need to Refine the Response Object
 - [ ] Add category filtering and tag support
 - [ ] Image upload for blog posts
 - [ ] Email verification on registration
