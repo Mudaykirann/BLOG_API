@@ -16,7 +16,7 @@ import java.nio.file.AccessDeniedException;
 
 
 @RestController
-@RequestMapping(path = "api/posts")
+@RequestMapping(path = "api/v1")
 public class PostController {
 
     private final PostService postService;
@@ -26,7 +26,7 @@ public class PostController {
         this.postService = postService;
     }
 
-    @GetMapping(path = "/all")
+    @GetMapping(path = "/posts")
     public ResponseEntity<UnifiedResponse<Page<PostDTO>>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
@@ -35,8 +35,7 @@ public class PostController {
         return ResponseEntity.ok(UnifiedResponse.ok("Post retrieved", allPosts));
     }
 
-    @GetMapping(path = "{userId}/all")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @GetMapping(path = "/users/{userId}/posts")
     public ResponseEntity<UnifiedResponse<Page<PostDTO>>> getAllPostsByUser(
             @PathVariable("userId") Long userId,
             @RequestParam(defaultValue = "0") int page,
@@ -46,7 +45,7 @@ public class PostController {
         return ResponseEntity.ok(UnifiedResponse.ok("Posts fetched successfully", posts));
     }
 
-    @PostMapping(path = "/{userId}/new")
+    @PostMapping(path = "/users/{userId}/posts")
     @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #userId == authentication.principal.id)")
     public ResponseEntity<UnifiedResponse<Void>> addNewPost(
             @PathVariable("userId") Long userId,
@@ -57,7 +56,7 @@ public class PostController {
                 .body(UnifiedResponse.ok("Post created successfully", null));
     }
 
-    @PutMapping(path="/{postid}")
+    @PutMapping(path="posts/{postid}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UnifiedResponse<Void>> updatePost(
             @PathVariable("postid") Long id,
@@ -67,7 +66,7 @@ public class PostController {
         return ResponseEntity.ok(UnifiedResponse.ok( "Post Updated successfully", null));
     }
 
-    @DeleteMapping(path = "/{postid}")
+    @DeleteMapping(path = "posts/{postid}")
     @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<UnifiedResponse<Void>> deletePost(@PathVariable("postid") Long id) {
         // Note: It's safer to handle ownership logic inside postService.deletePost(id)

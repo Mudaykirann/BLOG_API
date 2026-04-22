@@ -17,7 +17,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping(path = "api/")
+@RequestMapping(path = "api/v1")
 public class UserController {
 
     private  final UserService userService;
@@ -36,19 +36,18 @@ public class UserController {
     }
 
     @GetMapping(path = "/users/{id}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<UnifiedResponse<UserDTO>> getUserDetails(@PathVariable("id") Long id) {
         UserDTO user = userService.getUserDetails(id);
         return ResponseEntity.ok(UnifiedResponse.ok( "User fetched successfully", user));
     }
 
-    @PostMapping(path = "auth/login")
-    public ResponseEntity<String> login(@RequestBody User u) {
+    @PostMapping(path = "/auth/login")
+    public ResponseEntity<UnifiedResponse<String>> login(@RequestBody User u) {
         String token = userService.verifyUser(u);
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(UnifiedResponse.ok("Token Fetched successfully",token));
     }
 
-    @PostMapping(path = "auth/register")
+    @PostMapping(path = "/auth/register")
     public ResponseEntity<UnifiedResponse<Void>> registerUser(@Valid @RequestBody User u) {
         if (u.getRole() == null) {
             u.setRole(Role.USER);
