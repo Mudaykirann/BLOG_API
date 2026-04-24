@@ -56,28 +56,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*").permitAll()
-
-                        // 2. Specific Post Rules (Nested paths should usually come first)
-                        // Allows both USER and ADMIN to View (GET) and Create (POST) posts
-//                        .requestMatchers("/api/v1/users/*/posts/**").hasAnyRole("USER", "ADMIN")
-//
-//                        // 3. Admin-Only User Management (DELETE/PUT on user accounts)
-//                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/**").hasRole("ADMIN")
-//
-//                        // 4. General User access (e.g., getting user profile)
-//                        .requestMatchers("/api/v1/users/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated())
 
                 // Enables the standard browser-based login form provided by Spring Security
-                .formLogin(Customizer.withDefaults())
+                //.formLogin(Customizer.withDefaults())
 
                 // Enables HTTP Basic authentication (the browser popup/header-based auth for APIs)
-                .httpBasic(Customizer.withDefaults())
+                //.httpBasic(Customizer.withDefaults())
 
                 // Configures session policy; NEVER means Spring won't create a session, but will use one if it exists
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterAt(jwtFilter,UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
                 // Finalizes the configuration and returns the built SecurityFilterChain object
                 .build();
     }
