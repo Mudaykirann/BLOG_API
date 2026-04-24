@@ -1,9 +1,13 @@
 package com.API.BlogV2.Controller;
 
 import com.API.BlogV2.DTO.UserDTO;
+import com.API.BlogV2.Entity.RefreshToken;
 import com.API.BlogV2.Entity.Role;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Exception.UnifiedResponse;
+import com.API.BlogV2.Repository.UserRepository;
+import com.API.BlogV2.Service.JWTService;
+import com.API.BlogV2.Service.RefreshTokenService;
 import com.API.BlogV2.Service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,16 @@ import java.util.List;
 public class UserController {
 
     private  final UserService userService;
+
+
+    @Autowired
+    private JWTService jwtService;
+
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
+    @Autowired
+    private UserRepository userRepository;
 
 
     @Autowired
@@ -42,9 +56,19 @@ public class UserController {
     }
 
     @PostMapping(path = "/auth/login")
-    public ResponseEntity<UnifiedResponse<String>> login(@RequestBody User u) {
+    public ResponseEntity<UnifiedResponse<TokenResponse>> login(@RequestBody User u) {
         String token = userService.verifyUser(u);
-        return ResponseEntity.ok(UnifiedResponse.ok("Token Fetched successfully",token));
+
+
+        User authenticatedUser = userRepository.findByEmail(u.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 3. Use the ID directly from the object - No more Long.parseLong(null)!
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getId());
+
+        TokenResponse responseData = new TokenResponse(token, refreshToken.getToken());
+
+        return ResponseEntity.ok(UnifiedResponse.ok("Token Fetched successfully",responseData));
     }
 
     @PostMapping(path = "/auth/register")
