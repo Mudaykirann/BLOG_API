@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/search/**").permitAll()
                         .anyRequest().authenticated())
 
                 // Enables the standard browser-based login form provided by Spring Security

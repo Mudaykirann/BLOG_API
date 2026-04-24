@@ -114,4 +114,13 @@ public class PostService {
                 .orElseThrow(() -> new NoSuchElementException("Post not found"));
         postRepository.delete(p);
     }
+
+
+    public List<PostDTO> searchPostByTitle(String keyword){
+        List<Post> posts = postRepository.findByTitleContainingIgnoreCase(keyword);
+
+        return posts.stream()
+                .map(postMapper::mapToDTO)
+                .collect(Collectors.toList());
+    }
 }
