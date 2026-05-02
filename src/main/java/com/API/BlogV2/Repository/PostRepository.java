@@ -1,6 +1,7 @@
 package com.API.BlogV2.Repository;
 
 import com.API.BlogV2.DTO.PostRequestDTO;
+import com.API.BlogV2.Entity.CategoryType;
 import com.API.BlogV2.Entity.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,9 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
 
     List<Post> findByTitleContainingIgnoreCase(String title);
+
+    @Query("SELECT p FROM Post p JOIN p.categories c WHERE c = :category")
+    List<Post> findByCategoriesContaining(@Param("category") CategoryType category);
 
 
 }

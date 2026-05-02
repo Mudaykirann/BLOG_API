@@ -1,8 +1,12 @@
 package com.API.BlogV2.DTO;
 
+import com.API.BlogV2.Entity.CategoryType;
 import com.API.BlogV2.Entity.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class PostRequestDTO {
 
@@ -11,15 +15,20 @@ public class PostRequestDTO {
     @Size(min = 3, max = 200 , message = "Title must be between 3 and 100 characters")
     private String title;
 
-    @NotBlank(message = "Author is required.")
-    private String author;
-
-
-
-
     @NotBlank(message = "content is required")
     @Size(min=10,max=500,message = "Content must be between 10 and 500 characters")
     private String content;
+
+
+    private Set<CategoryType> categories = new HashSet<>();
+
+    public Set<CategoryType> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<CategoryType> categories) {
+        this.categories = categories; // Change from .addAll to direct assignment
+    }
 
     public String getContent() {
         return content;
@@ -27,14 +36,6 @@ public class PostRequestDTO {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
     }
 
     public String getTitle() {

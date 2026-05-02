@@ -1,39 +1,30 @@
 package com.API.BlogV2.DTO;
-
-
-
-
-//flow is like this
-//Controller → Service → Repository
-//        ↓
-//        Entity
-//        ↓
-//        Mapper
-//        ↓
-//        DTO
-
+import com.API.BlogV2.Entity.CategoryType;
 import com.API.BlogV2.Entity.Comment;
 import com.API.BlogV2.Entity.Post;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+
 
 public class PostDTO {
 
     private String title;
-    private String author;
     private String content;
 
-    private List<CommentDTO> comments = new ArrayList<>();
+    private Set<CategoryType> categories = new HashSet<>();
 
-
-    public List<CommentDTO> getComments() {
-        return comments;
+    public Set<CategoryType> getCategories() {
+        return categories;
     }
 
-    public void setComments(List<CommentDTO> comments) {
-        this.comments = comments;
+    public void setCategories(Set<CategoryType> categories) {
+        this.categories = categories;
     }
+
 
     public String getContent() {
         return content;
@@ -51,11 +42,4 @@ public class PostDTO {
         this.title = title;
     }
 
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
 }

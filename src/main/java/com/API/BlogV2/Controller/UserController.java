@@ -1,9 +1,12 @@
 package com.API.BlogV2.Controller;
 
+import com.API.BlogV2.DTO.LoginDTO;
 import com.API.BlogV2.DTO.UserDTO;
+import com.API.BlogV2.DTO.UserSignupDTO;
 import com.API.BlogV2.Entity.RefreshToken;
 import com.API.BlogV2.Entity.Role;
 import com.API.BlogV2.Entity.User;
+import com.API.BlogV2.Entity.UserPrincple;
 import com.API.BlogV2.Exception.UnifiedResponse;
 import com.API.BlogV2.Repository.UserRepository;
 import com.API.BlogV2.Service.JWTService;
@@ -15,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,7 +60,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/auth/login")
-    public ResponseEntity<UnifiedResponse<TokenResponse>> login(@RequestBody User u) {
+    public ResponseEntity<UnifiedResponse<TokenResponse>> login(@RequestBody LoginDTO u) {
         String token = userService.verifyUser(u);
 
 
@@ -66,19 +70,19 @@ public class UserController {
         // 3. Use the ID directly from the object - No more Long.parseLong(null)!
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getId());
 
-        TokenResponse responseData = new TokenResponse(token, refreshToken.getToken());
+        TokenResponse responseData = new TokenResponse(token, refreshToken.getToken(),authenticatedUser.getId());
 
         return ResponseEntity.ok(UnifiedResponse.ok("Token Fetched successfully",responseData));
     }
 
-    @PostMapping(path = "/auth/register")
-    public ResponseEntity<UnifiedResponse<Void>> registerUser(@Valid @RequestBody User u) {
-        if (u.getRole() == null) {
-            u.setRole(Role.USER);
-        }
-        userService.registerUser(u);
+    @PostMapping("/auth/register")
+    public ResponseEntity<UnifiedResponse<Void>> registerUser(
+            @Valid @RequestBody UserSignupDTO dto) {
+
+        userService.registerUser(dto);
+
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(UnifiedResponse.ok( "User Registered successfully", null));
+                .body(UnifiedResponse.ok("User Registered successfully", null));
     }
 
     @DeleteMapping(path = "/users/{id}")
@@ -93,5 +97,18 @@ public class UserController {
     public ResponseEntity<UnifiedResponse<Void>> updateUser(@PathVariable("id") Long id, @RequestBody UserDTO userDTO) throws AccessDeniedException {
         userService.updateUser(id, userDTO);
         return ResponseEntity.ok(UnifiedResponse.ok( "User Updated Successfully", null));
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<UnifiedResponse<String>> logout() {
+        // 1. Get the current user from SecurityContext
+        UserPrincple userDetails = (UserPrincple) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+
+        User user = userRepository.findById(userDetails.getId()).get();
+
+        // 2. Delete the refresh token from DB
+        refreshTokenService.deleteByUser(user);
+        return ResponseEntity.ok(UnifiedResponse.ok("Logged out successfully. Refresh token invalidated.",null));
     }
 }
