@@ -1,11 +1,7 @@
 package com.API.BlogV2.Entity;
 
 import jakarta.persistence.*;
-import org.apache.logging.log4j.util.Lazy;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.*;
 
 @Entity
 @Table(name = "posts")
@@ -17,53 +13,90 @@ public class Post {
             sequenceName = "post_sequence",
             allocationSize = 1
     )
-
-    @GeneratedValue(strategy = GenerationType.SEQUENCE , generator = "post_sequence")
-
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "post_sequence")
     private Long id;
-    private String title;
-    private String content;
-    private String author;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @Column(nullable = false, length = 200)
+    private String title;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
+
+    private int commentCount = 0;
+
+    // Relationship with User (author of post)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL,fetch = FetchType.LAZY, orphanRemoval = true)
+    // Comments
+    @OneToMany(
+            mappedBy = "post",
+            cascade = CascadeType.ALL,
+            fetch = FetchType.LAZY,
+            orphanRemoval = true
+    )
     private List<Comment> comments = new ArrayList<>();
 
+    // Categories (Enum)
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "post_categories", joinColumns = @JoinColumn(name = "post_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    private Set<CategoryType> categories = new HashSet<>();
 
-    public List<Comment> getComments() {
-        return comments;
-    }
+    // Constructors
+    public Post() {}
 
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-
-    public Post(){
-    }
-
-    public Post(String title, String content,String author) {
+    public Post(String title, String content, User user) {
         this.title = title;
         this.content = content;
-        this.author=author;
+        this.user = user;
     }
+
+    //  Lifecycle Hooks
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = new Date();
+    }
+
+    // Helper methods
+
+    public void addCategory(CategoryType category) {
+        this.categories.add(category);
+    }
+
+    public void removeCategory(CategoryType category) {
+        this.categories.remove(category);
+    }
+
+    public void addComment(Comment comment) {
+        comments.add(comment);
+        comment.setPost(this);
+        this.commentCount = comments.size(); // keep in sync
+    }
+
+    public void removeComment(Comment comment) {
+        comments.remove(comment);
+        comment.setPost(null);
+        this.commentCount = comments.size();
+    }
+
+    // Getters & Setters
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getTitle() {
@@ -88,5 +121,25 @@ public class Post {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public Set<CategoryType> getCategories() {
+        return categories;
+    }
+
+    public int getCommentCount() {
+        return commentCount;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
     }
 }

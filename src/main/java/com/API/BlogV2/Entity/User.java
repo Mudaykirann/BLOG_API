@@ -1,14 +1,12 @@
 package com.API.BlogV2.Entity;
 
-
 import jakarta.persistence.*;
-
+import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
 public class User {
-
 
     @Id
     @SequenceGenerator(
@@ -17,44 +15,79 @@ public class User {
             allocationSize = 1
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_sequence")
-
     private Long id;
+
+    @Column(nullable = false, length = 100)
     private String name;
+
+    @Column(length = 100)
+    private String displayName;
+
+    @Column(nullable = false, unique = true)
     private String email;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(length = 500)
+    private String bio;
+
+    @Column(length = 100)
     private String occupation;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdAt;
 
-
-    @OneToMany(mappedBy = "user" , cascade = CascadeType.ALL)
-    private List<Post> posts;
-
-    public User(){}
-
-    public User(String name, String email,String password,String occupation) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.occupation = occupation;
-    }
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedAt;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    public Role getRole() {
-        return role;
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts;
 
-    public void setRole(Role role) {
-        this.role = role;
-    }
+    // 🔹 Constructors
+    public User() {}
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
+    public User(String name, String email, String password, String bio, String occupation) {
+        this.name = name;
         this.email = email;
+        this.password = password;
+        this.bio = bio;
+        this.occupation = occupation;
+    }
+
+    // 🔹 Auto timestamp handling
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = new Date();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = new Date();
+    }
+
+
+
+
+    public String generateDisplayName(String name) {;
+        String cleaned = name
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]", ""); // remove special chars
+
+        // take first 5 characters safely
+        if (cleaned.length() > 5) {
+            cleaned = cleaned.substring(0, 5);
+        }
+        return cleaned;
+    }
+
+    // 🔹 Getters & Setters
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
@@ -65,12 +98,22 @@ public class User {
         this.name = name;
     }
 
-    public Long getId() {
-        return id;
+    public void setDisplayName(String displayName) {
+        this.displayName = generateDisplayName(this.name);
     }
 
-    public void setId(Long id) {
-        this.id = id;
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
@@ -81,11 +124,43 @@ public class User {
         this.password = password;
     }
 
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
     public String getOccupation() {
         return occupation;
     }
 
     public void setOccupation(String occupation) {
         this.occupation = occupation;
+    }
+
+    public Date getCreatedAt() {
+        return createdAt;
+    }
+
+    public Date getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 }

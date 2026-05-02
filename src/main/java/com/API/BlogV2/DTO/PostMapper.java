@@ -11,7 +11,10 @@ import org.springframework.context.annotation.Bean;
 public interface PostMapper {
 
     // 1. Map Entity to DTO
-    PostDTO mapToDTO(Post post);
+    @Mapping(target = "authorName", source = "user.name")
+    @Mapping(target = "categories", source = "categories")
+    @Mapping(target = "comments", source = "comments")
+    PostResponseDTO mapToDTO(Post post);
 
     // 2. Map DTO back to Entity
     @Mapping(target = "id", ignore = true)

@@ -9,7 +9,8 @@ public class UserDTO {
 
 
     private Long id;
-    @NotBlank(message = "name is required")
+
+    @NotBlank(message = "Name is required")
     @Size(min = 3 , max=100,message = "name should between 3 and 100 character")
     private String name;
 
@@ -17,9 +18,12 @@ public class UserDTO {
     @Email
     private String email;
 
-    @NotBlank(message = "occupation is required")
     @Size(min = 5, max=100,message = "occupation should between 5 and 100 character")
     private String occupation;
+
+
+    private String displayName;
+    private String bio;
 
 
     public String getOccupation() {
@@ -52,5 +56,21 @@ public class UserDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
     }
 }

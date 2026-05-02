@@ -2,6 +2,9 @@ package com.API.BlogV2.Controller;
 
 import com.API.BlogV2.DTO.PostDTO;
 import com.API.BlogV2.DTO.PostRequestDTO;
+import com.API.BlogV2.DTO.PostResponseDTO;
+import com.API.BlogV2.Entity.CategoryType;
+import com.API.BlogV2.Entity.Post;
 import com.API.BlogV2.Exception.UnifiedResponse;
 import com.API.BlogV2.Service.PostService;
 import jakarta.validation.Valid;
@@ -29,21 +32,27 @@ public class PostController {
     }
 
     @GetMapping(path = "/posts")
-    public ResponseEntity<UnifiedResponse<Page<PostDTO>>> getAllPosts(
+    public ResponseEntity<UnifiedResponse<Page<PostResponseDTO>>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ){
-        Page<PostDTO> allPosts = postService.getAllPosts(page, size);
+        Page<PostResponseDTO> allPosts = postService.getAllPosts(page, size);
         return ResponseEntity.ok(UnifiedResponse.ok("Post retrieved", allPosts));
     }
 
+
+    @GetMapping(path= "posts/{post_id}")
+    public ResponseEntity<PostResponseDTO> getPostById(@PathVariable Long post_id) {
+        return ResponseEntity.ok(postService.getPostById(post_id));
+    }
+
     @GetMapping(path = "/users/{userId}/posts")
-    public ResponseEntity<UnifiedResponse<Page<PostDTO>>> getAllPostsByUser(
+    public ResponseEntity<UnifiedResponse<Page<PostResponseDTO>>> getAllPostsByUser(
             @PathVariable("userId") Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {
-        Page<PostDTO> posts = postService.getPostsByUserId(userId, page, size);
+        Page<PostResponseDTO> posts = postService.getPostsByUserId(userId, page, size);
         return ResponseEntity.ok(UnifiedResponse.ok("Posts fetched successfully", posts));
     }
 
@@ -53,7 +62,7 @@ public class PostController {
             @PathVariable("userId") Long userId,
             @Valid @RequestBody PostRequestDTO p
     ) {
-        postService.addNewPostWithUser(userId, p);
+        postService.addNewPost(userId, p);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(UnifiedResponse.ok("Post created successfully", null));
     }
@@ -79,10 +88,16 @@ public class PostController {
 
 
     @GetMapping(path = "/posts/search/{keyword}")
-    public ResponseEntity<UnifiedResponse<List<PostDTO>>> searchPosts(@PathVariable("keyword") String keyword){
+    public ResponseEntity<UnifiedResponse<List<PostResponseDTO>>> searchPosts(@PathVariable("keyword") String keyword){
 
-        List<PostDTO> posts = postService.searchPostByTitle(keyword);
+        List<PostResponseDTO> posts = postService.searchPostByTitle(keyword);
         return ResponseEntity.ok(UnifiedResponse.ok( "Post Deleted successfully", posts));
+    }
+
+    @GetMapping(path = "/posts/category/{category}")
+    public  ResponseEntity<UnifiedResponse<List<PostResponseDTO>>> getPostsByCategory(@PathVariable("category") String category){
+        List<PostResponseDTO> categoryPosts = postService.getPostsByCategory(category);
+        return ResponseEntity.ok(UnifiedResponse.ok( "Post Deleted successfully", categoryPosts));
     }
 
 }

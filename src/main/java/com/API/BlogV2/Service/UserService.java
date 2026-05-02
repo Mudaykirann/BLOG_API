@@ -1,7 +1,10 @@
 package com.API.BlogV2.Service;
 
+import com.API.BlogV2.DTO.LoginDTO;
 import com.API.BlogV2.DTO.UserDTO;
 import com.API.BlogV2.DTO.UserMapper;
+import com.API.BlogV2.DTO.UserSignupDTO;
+import com.API.BlogV2.Entity.Role;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +44,21 @@ public class UserService {
         this.userMapper = userMapper;
     }
 
-    public void registerUser(User u) {
-        u.setPassword(bCryptPasswordEncoder.encode(u.getPassword()));
-        userRepository.save(u);
+    public void registerUser(UserSignupDTO dto) {
+
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setBio(dto.getBio());
+        user.setOccupation(dto.getOccupation());
+        user.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
+        user.setRole(Role.USER);
+        user.setDisplayName(dto.getDisplayName());
+        userRepository.save(user);
     }
 
     public UserDTO getUserDetails(Long id) {
@@ -64,11 +79,14 @@ public class UserService {
                 .toList();
     }
 
-    public String verifyUser(User u) {
+    public String verifyUser(LoginDTO u) {
         Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(u.getName(),u.getPassword()));
 
+        User user = userRepository.findByEmail(u.getEmail())
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
         if(auth.isAuthenticated()){
-            return jwtService.generateToken(u.getName());
+            return jwtService.generateToken(u.getName(),user.getId());
         }
 
         return "Fail";
@@ -76,7 +94,7 @@ public class UserService {
 
     public void deleteUser(Long id){
         User user = userRepository.findById(id)
-                        .orElseThrow(() -> new NoSuchElementException("User not found"));
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
         userRepository.deleteById(id);
     }
 
@@ -86,6 +104,7 @@ public class UserService {
         user.setEmail(userDTO.getEmail());
         user.setName(userDTO.getName());
         user.setOccupation(userDTO.getOccupation());
+        user.setBio(userDTO.getBio());
         userRepository.save(user);
     }
 }

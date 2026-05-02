@@ -18,6 +18,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration // Marks this class as a source of bean definitions for the Spring context
 @EnableWebSecurity // Enables Spring Security's web security support and provides the Spring MVC integration
@@ -34,11 +39,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
+
+
+                .cors(Customizer.withDefaults())
                 // Disables CSRF protection (Common for REST APIs since they are usually stateless)
                 .csrf(customizer -> customizer.disable())
 
+
                 // Ensures that EVERY request sent to the server must be from an authenticated user
                 .authorizeHttpRequests(request -> request
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -56,7 +66,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/search/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/category/**").permitAll()
                         .anyRequest().authenticated())
 
                 // Enables the standard browser-based login form provided by Spring Security
@@ -90,5 +102,26 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config){
         return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Match your Vite port
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+
+        // Define allowed methods
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+
+        // Allow all headers (including Authorization for your JWT)
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+
+        // Allow credentials for OAuth2/Cookies
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

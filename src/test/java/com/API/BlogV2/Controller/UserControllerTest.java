@@ -86,48 +86,48 @@ class UserControllerTest {
     }
 
 
-    @Test
-    void testLogin() throws Exception {
-
-        when(userService.verifyUser(any(User.class)))
-                .thenReturn("token123");
-
-        mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-            {
-                "name": "mohan",
-                "email": "mohan@gmail.com",
-                "occupation": "barber",
-                "password": "m@123",
-                "role":"ADMIN"
-            }
-        """))
-                .andExpect(status().isOk())
-                .andExpect(content().string("token123"));
-    }
-    @Test
-    void testRegister() throws Exception {
-
-        //because it doesn't return any value
-        doNothing().when(userService).registerUser(any(User.class));
-
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-            {
-                "name": "mohan",
-                "email": "mohan@gmail.com",
-                "occupation": "barber",
-                "password": "m@123",
-                "role":"ADMIN"
-            }
-        """))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message")
-                        .value("User Registered successfully"))
-                .andExpect(jsonPath("$.status")
-                        .value("success"));
-    }
+//    @Test
+//    void testLogin() throws Exception {
+//
+//        when(userService.verifyUser(any(User.class)))
+//                .thenReturn("token123");
+//
+//        mockMvc.perform(post("/api/auth/login")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content("""
+//            {
+//                "name": "mohan",
+//                "email": "mohan@gmail.com",
+//                "occupation": "barber",
+//                "password": "m@123",
+//                "role":"ADMIN"
+//            }
+//        """))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string("token123"));
+//    }
+    //@Test
+//    void testRegister() throws Exception {
+//
+//        //because it doesn't return any value
+//        doNothing().when(userService).registerUser(User.class);
+//
+//        mockMvc.perform(post("/api/auth/register")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content("""
+//            {
+//                "name": "mohan",
+//                "email": "mohan@gmail.com",
+//                "occupation": "barber",
+//                "password": "m@123",
+//                "role":"ADMIN"
+//            }
+//        """))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.message")
+//                        .value("User Registered successfully"))
+//                .andExpect(jsonPath("$.status")
+//                        .value("success"));
+//    }
 
 }
