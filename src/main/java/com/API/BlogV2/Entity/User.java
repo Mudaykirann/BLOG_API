@@ -1,11 +1,14 @@
 package com.API.BlogV2.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.Date;
 import java.util.List;
 
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
     @Id
@@ -44,7 +47,16 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+
+    @Column(name = "profile_pic_url")
+    private String profilePicUrl;       // Full ImageKit URL stored here
+
+    // Getter & Setter
+    public String getProfilePicUrl() { return profilePicUrl; }
+    public void setProfilePicUrl(String profilePicUrl) { this.profilePicUrl = profilePicUrl; }
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Post> posts;
 
     // 🔹 Constructors

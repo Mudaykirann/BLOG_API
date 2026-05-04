@@ -1,5 +1,6 @@
 package com.API.BlogV2.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.*;
 
@@ -33,6 +34,7 @@ public class Post {
     // Relationship with User (author of post)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"posts", "password", "hibernateLazyInitializer"})
     private User user;
 
     // Comments
@@ -51,14 +53,24 @@ public class Post {
     @Column(name = "category")
     private Set<CategoryType> categories = new HashSet<>();
 
+    @Column(name = "cover_image_url")
+    private String coverImageUrl;       // Full ImageKit URL stored here
+
+    // Getter & Setter
+    public String getCoverImageUrl() { return coverImageUrl; }
+    public void setCoverImageUrl(String coverImageUrl) { this.coverImageUrl = coverImageUrl; }
+
     // Constructors
     public Post() {}
 
-    public Post(String title, String content, User user) {
+    public Post(String title, String content, User user, String coverImageUrl) {
         this.title = title;
         this.content = content;
         this.user = user;
+        this.coverImageUrl = coverImageUrl;
     }
+
+
 
     //  Lifecycle Hooks
     @PrePersist

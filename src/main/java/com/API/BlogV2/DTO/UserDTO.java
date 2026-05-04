@@ -1,5 +1,6 @@
 package com.API.BlogV2.DTO;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -10,11 +11,9 @@ public class UserDTO {
 
     private Long id;
 
-    @NotBlank(message = "Name is required")
     @Size(min = 3 , max=100,message = "name should between 3 and 100 character")
     private String name;
 
-    @NotBlank(message = "Email is required")
     @Email
     private String email;
 
@@ -24,6 +23,13 @@ public class UserDTO {
 
     private String displayName;
     private String bio;
+
+    private String profilePicUrl;
+
+    // Getter & Setter
+    public String getProfilePicUrl() { return profilePicUrl; }
+    public void setProfilePicUrl(String profilePicUrl) { this.profilePicUrl = profilePicUrl; }
+
 
 
     public String getOccupation() {

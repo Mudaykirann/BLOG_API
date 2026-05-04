@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -110,5 +111,27 @@ public class UserController {
         // 2. Delete the refresh token from DB
         refreshTokenService.deleteByUser(user);
         return ResponseEntity.ok(UnifiedResponse.ok("Logged out successfully. Refresh token invalidated.",null));
+    }
+
+
+    // In your existing UserController.java — ADD these endpoints
+    @PatchMapping("/users/{id}/profile-pic")
+    public ResponseEntity<User> updateProfilePic(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+
+        String imageUrl = body.get("imageUrl"); // URL returned by ImageKit after upload
+        User updated = userService.updateProfilePic(id, imageUrl);
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/users/{id}/profile-pic/thumbnail")
+    public ResponseEntity<Map<String, String>> getProfilePicThumbnail(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "150") int width,
+            @RequestParam(defaultValue = "150") int height) {
+
+        String url = userService.getResizedProfilePic(id, width, height);
+        return ResponseEntity.ok(Map.of("url", url));
     }
 }

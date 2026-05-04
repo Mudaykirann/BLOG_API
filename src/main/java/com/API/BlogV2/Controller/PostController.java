@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -98,6 +99,28 @@ public class PostController {
     public  ResponseEntity<UnifiedResponse<List<PostResponseDTO>>> getPostsByCategory(@PathVariable("category") String category){
         List<PostResponseDTO> categoryPosts = postService.getPostsByCategory(category);
         return ResponseEntity.ok(UnifiedResponse.ok( "Post Deleted successfully", categoryPosts));
+    }
+
+    // In your existing PostController.java — ADD these endpoints
+
+    @PatchMapping("/posts/{id}/cover-image")
+    public ResponseEntity<Post> updateCoverImage(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+
+        String imageUrl = body.get("imageUrl"); // URL returned by ImageKit after upload
+        Post updated = postService.updateCoverImage(id, imageUrl);
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/posts/{id}/cover-image/thumbnail")
+    public ResponseEntity<Map<String, String>> getCoverThumbnail(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "800") int width,
+            @RequestParam(defaultValue = "400") int height) {
+
+        String url = postService.getCoverThumbnail(id, width, height);
+        return ResponseEntity.ok(Map.of("url", url));
     }
 
 }

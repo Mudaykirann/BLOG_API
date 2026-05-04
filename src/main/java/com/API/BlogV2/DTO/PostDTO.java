@@ -17,6 +17,14 @@ public class PostDTO {
 
     private Set<CategoryType> categories = new HashSet<>();
 
+
+    private String coverImageUrl;       // Full ImageKit URL stored here
+
+    public String getCoverImageUrl() { return coverImageUrl; }
+    public void setCoverImageUrl(String coverImageUrl) { this.coverImageUrl = coverImageUrl; }
+
+
+
     public Set<CategoryType> getCategories() {
         return categories;
     }
@@ -24,6 +32,9 @@ public class PostDTO {
     public void setCategories(Set<CategoryType> categories) {
         this.categories = categories;
     }
+
+
+
 
 
     public String getContent() {

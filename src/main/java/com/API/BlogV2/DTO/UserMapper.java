@@ -14,6 +14,7 @@ public class UserMapper {
         userDTO.setEmail(u.getEmail());
         userDTO.setOccupation(u.getOccupation());
         userDTO.setBio(u.getBio());
+        userDTO.setProfilePicUrl(u.getProfilePicUrl());
         return userDTO;
     }
 

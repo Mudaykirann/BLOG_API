@@ -19,8 +19,12 @@ public class PostRequestDTO {
     @Size(min=10,max=500,message = "Content must be between 10 and 500 characters")
     private String content;
 
-
     private Set<CategoryType> categories = new HashSet<>();
+
+    private String coverImageUrl;
+
+    public String getCoverImageUrl() { return coverImageUrl; }
+    public void setCoverImageUrl(String coverImageUrl) { this.coverImageUrl = coverImageUrl; }
 
     public Set<CategoryType> getCategories() {
         return categories;
