@@ -29,15 +29,19 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final ImageKitService imageKitService; // inject this
 
     @Autowired
     private PostMapper postMapper;
 
     @Autowired
-    public PostService(PostRepository postRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, ImageKitService imageKitService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.imageKitService = imageKitService;
     }
+
+
 
 
     public void addNewPost(Long userId, PostRequestDTO postRequestDTO) {
@@ -48,6 +52,8 @@ public class PostService {
         p.setTitle(postRequestDTO.getTitle());
         p.setContent(postRequestDTO.getContent());
         p.setUser(user);
+        p.setCoverImageUrl(postRequestDTO.getCoverImageUrl());
+
 
         // DEBUG: Print here to see if the DTO is actually receiving data from Postman
         System.out.println("Categories from DTO: " + postRequestDTO.getCategories());
@@ -148,5 +154,29 @@ public class PostService {
                 .stream()
                 .map(postMapper::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+
+    // In your existing PostService.java — ADD this method
+
+
+
+    /**
+     * Called after frontend uploads the image and gets back a URL from ImageKit.
+     */
+    public Post updateCoverImage(Long postId, String imageUrl) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found: " + postId));
+
+        post.setCoverImageUrl(imageUrl);
+        return postRepository.save(post);
+    }
+
+    // Optional: get a resized thumbnail of the post cover
+    public String getCoverThumbnail(Long postId, int width, int height) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found: " + postId));
+
+        return imageKitService.getTransformedUrl(post.getCoverImageUrl(), width, height);
     }
 }

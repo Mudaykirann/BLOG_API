@@ -24,6 +24,16 @@ public class PostResponseDTO {
     private Date createdAt;
     private Date updatedAt;
 
+
+    private String coverImageUrl;
+
+
+
+
+    public String getCoverImageUrl() { return coverImageUrl; }
+
+    public void setCoverImageUrl(String coverImageUrl) { this.coverImageUrl = coverImageUrl; }
+
     public Long getId() {
         return id;
     }

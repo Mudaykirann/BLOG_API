@@ -7,6 +7,7 @@ import com.API.BlogV2.DTO.UserSignupDTO;
 import com.API.BlogV2.Entity.Role;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,6 +26,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    private final ImageKitService imageKitService; // inject this
+
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -39,9 +42,10 @@ public class UserService {
     private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
 
     @Autowired
-    public UserService(UserRepository userRepository,UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, ImageKitService imageKitService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.imageKitService = imageKitService;
     }
 
     public void registerUser(UserSignupDTO dto) {
@@ -92,19 +96,47 @@ public class UserService {
         return "Fail";
     }
 
+
+    @Transactional
     public void deleteUser(Long id){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
         userRepository.deleteById(id);
     }
 
+
+    @Transactional
     public  void updateUser(Long id,UserDTO userDTO){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
-        user.setEmail(userDTO.getEmail());
         user.setName(userDTO.getName());
         user.setOccupation(userDTO.getOccupation());
         user.setBio(userDTO.getBio());
         userRepository.save(user);
+    }
+
+
+    // In your existing UserService.java — ADD this method
+
+
+
+    /**
+     * Called after frontend uploads the image and gets back a URL from ImageKit.
+     * Frontend sends that URL here — we just save it.
+     */
+    public User updateProfilePic(Long userId, String imageUrl) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        user.setProfilePicUrl(imageUrl);
+        return userRepository.save(user);
+    }
+
+    // Optional: get a resized version of the profile pic
+    public String getResizedProfilePic(Long userId, int width, int height) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+
+        return imageKitService.getTransformedUrl(user.getProfilePicUrl(), width, height);
     }
 }

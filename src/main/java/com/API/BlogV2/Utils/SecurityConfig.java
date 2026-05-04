@@ -63,10 +63,13 @@ public class SecurityConfig {
                         .permitAll()
 
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/imagekit/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*/posts").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/search/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/category/**").permitAll()
                         .anyRequest().authenticated())
