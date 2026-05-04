@@ -1,4 +1,4 @@
-# 📝 Blog REST API
+# 📝 Blog Backend System using REST API
 
 Built a production-ready backend system for a RESTful Blog API using Java 17, Spring Boot 4, and PostgreSQL, with JWT authentication, role-based access, validation, and pagination.
 
