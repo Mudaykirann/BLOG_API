@@ -1,6 +1,6 @@
 # 📝 Blog REST API
 
-A production-ready **RESTful Blog API** built with **Java 17**, **Spring Boot 4**, and **PostgreSQL** — featuring JWT-based authentication, role-based access control, DTO pattern, input validation, and paginated responses.
+Built a production-ready backend system for a RESTful Blog API using Java 17, Spring Boot 4, and PostgreSQL, with JWT authentication, role-based access, validation, and pagination.
 
 
 ![In Progress](https://img.shields.io/badge/Status-In%20Progress-green?style=flat-square)
@@ -25,6 +25,7 @@ A production-ready **RESTful Blog API** built with **Java 17**, **Spring Boot 4*
 - ✅ **Input Validation** — Bean Validation (`@Valid`) on all request bodies
 - 📃 **Pagination & Sorting** — Paginated responses for posts and comments
 - 🗄️ **PostgreSQL** — Persistent relational data storage via Spring Data JPA
+- 🖼️ **ImageKit** — Uploading of user profile and post cover images.
 
 ---
 
@@ -39,6 +40,7 @@ A production-ready **RESTful Blog API** built with **Java 17**, **Spring Boot 4*
 | ORM | Spring Data JPA / Hibernate |
 | Build Tool | Maven |
 | Validation | Spring Boot Starter Validation |
+| Image Upload | ImageKit.io |
 
 ---
 
@@ -97,6 +99,9 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 server.error.include-message=always
 server.port=8083
+imagekit.public-key=your-public_key
+imagekit.private-key=your-private_key
+imagekit.url-endpoint=https://ik.imagekit.io/yourId
 ```
 
 ### 3. Build and run
