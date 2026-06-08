@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres-1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: BlogThor
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d BlogThor" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5433:5432" # Matches your 5433 host port preference
+    networks:
+      - blog-network
+
+  app:
+    build: .
+    container_name: app-1
+    ports:
+      - "9080:8090" # Matches your application's actual server.port (8084)
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/BlogThor
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      IMAGEKIT_PUBLIC_KEY: ${IMAGEKIT_PUBLIC}
+      IMAGEKIT_PRIVATE_KEY: ${IMAGEKIT_PRIVATE}
+      IMAGEKIT_URL_ENDPOINT: ${IMAGEKIT_URL}
+    networks:
+      - blog-network
+    volumes:
+      - postgres-s-data:/var/lib/postgresql/data
+
+networks:
+  blog-network:
+    driver: bridge
+
+volumes:
+  postgres-s-data:
