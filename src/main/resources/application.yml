@@ -1,33 +1,10 @@
 spring:
   application:
     name: BlogV2
-  datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: postgres
-    password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
-
-logging:
-  level:
-    org:
-      springframework:
-        security: DEBUG
-        web: DEBUG
+  profiles:
+    active: dev
 
 imagekit:
   public-key: ${IMAGEKIT_PUBLIC_KEY}
   private-key: ${IMAGEKIT_PRIVATE_KEY}
   url-endpoint: ${IMAGEKIT_URL_ENDPOINT}
-
-server:
-  error:
-    include-message: always
-  port: 8090

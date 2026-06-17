@@ -4,11 +4,12 @@ import com.API.BlogV2.Entity.CategoryType;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-public class PostResponseDTO {
+public class PostResponseDTO implements Serializable {
 
     private Long id;
     private String title;

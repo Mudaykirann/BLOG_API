@@ -1,0 +1,66 @@
+# ============================================
+# PROD PROFILE — All config from environment
+# Used by Docker Compose / cloud deployments
+# ============================================
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: postgres
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6389}
+
+  # FIX 2: Fixed the syntax to be a proper plain string
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000 # 10 minutes
+      use-key-prefix: true;
+      key-prefix: "blog_api::"
+      cache-null-values: false
+      enable-statistics: true
+
+logging:
+  level:
+    root: INFO
+    org:
+      springframework:
+        security: WARN
+        web: WARN
+    com:
+      API:
+        BlogV2: INFO
+
+# JWT secret MUST be set via env var in production
+jwt:
+  secret: ${JWT_SECRET}
+
+server:
+  error:
+    include-message: always
+  port: 8092
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: blogv2-api

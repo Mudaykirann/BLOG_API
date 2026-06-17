@@ -8,6 +8,7 @@ import com.API.BlogV2.Entity.Role;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Entity.UserPrincple;
 import com.API.BlogV2.Exception.UnifiedResponse;
+import com.API.BlogV2.Exception.ResourceNotFoundException;
 import com.API.BlogV2.Repository.UserRepository;
 import com.API.BlogV2.Service.JWTService;
 import com.API.BlogV2.Service.RefreshTokenService;
@@ -66,7 +67,7 @@ public class UserController {
 
 
         User authenticatedUser = userRepository.findByEmail(u.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", u.getEmail()));
 
         // 3. Use the ID directly from the object - No more Long.parseLong(null)!
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getId());
@@ -116,13 +117,13 @@ public class UserController {
 
     // In your existing UserController.java — ADD these endpoints
     @PatchMapping("/users/{id}/profile-pic")
-    public ResponseEntity<User> updateProfilePic(
+    public ResponseEntity<UnifiedResponse<UserDTO>> updateProfilePic(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
 
         String imageUrl = body.get("imageUrl"); // URL returned by ImageKit after upload
-        User updated = userService.updateProfilePic(id, imageUrl);
-        return ResponseEntity.ok(updated);
+        UserDTO updated = userService.updateProfilePic(id, imageUrl);
+        return ResponseEntity.ok(UnifiedResponse.ok("Profile pic updated successfully", updated));
     }
 
     @GetMapping("/users/{id}/profile-pic/thumbnail")

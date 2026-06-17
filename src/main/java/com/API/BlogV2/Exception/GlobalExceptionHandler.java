@@ -12,9 +12,36 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<UnifiedResponse<Void>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(UnifiedResponse.error(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(BlogAPIException.class)
+    public ResponseEntity<UnifiedResponse<Void>> handleBlogAPIException(BlogAPIException ex) {
+        return ResponseEntity.status(ex.getStatus())
+                .body(UnifiedResponse.error(ex.getStatus().value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    public ResponseEntity<UnifiedResponse<Void>> handleAccessDeniedException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(UnifiedResponse.error(HttpStatus.FORBIDDEN.value(), "Access Denied: " + ex.getMessage()));
+    }
+
+    // Global catch-all
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<UnifiedResponse<Void>> handleGlobalException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(UnifiedResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error: " + ex.getMessage()));
+    }
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<UnifiedResponse<Void>> handleNotFound(NoSuchElementException ex) {

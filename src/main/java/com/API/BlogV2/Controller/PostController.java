@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import jdk.dynalink.linker.LinkerServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import com.API.BlogV2.DTO.PageResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,11 +34,11 @@ public class PostController {
     }
 
     @GetMapping(path = "/posts")
-    public ResponseEntity<UnifiedResponse<Page<PostResponseDTO>>> getAllPosts(
+    public ResponseEntity<UnifiedResponse<PageResponseDTO<PostResponseDTO>>> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ){
-        Page<PostResponseDTO> allPosts = postService.getAllPosts(page, size);
+        PageResponseDTO<PostResponseDTO> allPosts = postService.getAllPosts(page, size);
         return ResponseEntity.ok(UnifiedResponse.ok("Post retrieved", allPosts));
     }
 
@@ -48,12 +49,12 @@ public class PostController {
     }
 
     @GetMapping(path = "/users/{userId}/posts")
-    public ResponseEntity<UnifiedResponse<Page<PostResponseDTO>>> getAllPostsByUser(
+    public ResponseEntity<UnifiedResponse<PageResponseDTO<PostResponseDTO>>> getAllPostsByUser(
             @PathVariable("userId") Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size
     ) {
-        Page<PostResponseDTO> posts = postService.getPostsByUserId(userId, page, size);
+        PageResponseDTO<PostResponseDTO> posts = postService.getPostsByUserId(userId, page, size);
         return ResponseEntity.ok(UnifiedResponse.ok("Posts fetched successfully", posts));
     }
 
@@ -92,25 +93,25 @@ public class PostController {
     public ResponseEntity<UnifiedResponse<List<PostResponseDTO>>> searchPosts(@PathVariable("keyword") String keyword){
 
         List<PostResponseDTO> posts = postService.searchPostByTitle(keyword);
-        return ResponseEntity.ok(UnifiedResponse.ok( "Post Deleted successfully", posts));
+        return ResponseEntity.ok(UnifiedResponse.ok( "Posts fetched successfully", posts));
     }
 
     @GetMapping(path = "/posts/category/{category}")
     public  ResponseEntity<UnifiedResponse<List<PostResponseDTO>>> getPostsByCategory(@PathVariable("category") String category){
         List<PostResponseDTO> categoryPosts = postService.getPostsByCategory(category);
-        return ResponseEntity.ok(UnifiedResponse.ok( "Post Deleted successfully", categoryPosts));
+        return ResponseEntity.ok(UnifiedResponse.ok( "Posts fetched successfully", categoryPosts));
     }
 
     // In your existing PostController.java — ADD these endpoints
 
     @PatchMapping("/posts/{id}/cover-image")
-    public ResponseEntity<Post> updateCoverImage(
+    public ResponseEntity<UnifiedResponse<PostResponseDTO>> updateCoverImage(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
 
         String imageUrl = body.get("imageUrl"); // URL returned by ImageKit after upload
-        Post updated = postService.updateCoverImage(id, imageUrl);
-        return ResponseEntity.ok(updated);
+        PostResponseDTO updated = postService.updateCoverImage(id, imageUrl);
+        return ResponseEntity.ok(UnifiedResponse.ok("Cover image updated successfully", updated));
     }
 
     @GetMapping("/posts/{id}/cover-image/thumbnail")

@@ -1,11 +1,20 @@
 package com.API.BlogV2.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.*;
 
 @Entity
 @Table(name = "posts")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Post {
 
     @Id
@@ -56,19 +65,9 @@ public class Post {
     @Column(name = "cover_image_url")
     private String coverImageUrl;       // Full ImageKit URL stored here
 
-    // Getter & Setter
-    public String getCoverImageUrl() { return coverImageUrl; }
-    public void setCoverImageUrl(String coverImageUrl) { this.coverImageUrl = coverImageUrl; }
 
-    // Constructors
-    public Post() {}
 
-    public Post(String title, String content, User user, String coverImageUrl) {
-        this.title = title;
-        this.content = content;
-        this.user = user;
-        this.coverImageUrl = coverImageUrl;
-    }
+
 
 
 
@@ -105,53 +104,4 @@ public class Post {
         this.commentCount = comments.size();
     }
 
-    // Getters & Setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public List<Comment> getComments() {
-        return comments;
-    }
-
-    public Set<CategoryType> getCategories() {
-        return categories;
-    }
-
-    public int getCommentCount() {
-        return commentCount;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
 }
