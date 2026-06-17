@@ -1,5 +1,9 @@
 package com.API.BlogV2.Entity;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -11,6 +15,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name="comments")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Comment {
 
     @Id
@@ -41,12 +49,6 @@ public class Comment {
     private LocalDateTime createdAt = LocalDateTime.now();
 
 
-    public Comment(){}
-    public Comment( String content, User user, Post post) {
-        this.content = content;
-        this.user = user;
-        this.post = post;
-    }
 
 
     @JsonProperty("user_id")
@@ -59,40 +61,5 @@ public class Comment {
         return (post != null) ? post.getId() : null;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Post getPost() {
-        return post;
-    }
-
-    public void setPost(Post post) {
-        this.post = post;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
 
 }

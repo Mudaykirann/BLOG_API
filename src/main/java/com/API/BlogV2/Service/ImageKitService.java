@@ -2,6 +2,8 @@ package com.API.BlogV2.Service;
 
 import com.API.BlogV2.Utils.ImageKitConfig;
 import org.springframework.stereotype.Service;
+import com.API.BlogV2.Exception.BlogAPIException;
+import org.springframework.http.HttpStatus;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -60,7 +62,7 @@ public class ImageKitService {
             return authParams;
 
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new RuntimeException("Failed to generate ImageKit auth params", e);
+            throw new BlogAPIException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to generate ImageKit auth params");
         }
     }
 

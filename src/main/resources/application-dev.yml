@@ -1,0 +1,45 @@
+# ============================================
+# DEV PROFILE — Local development defaults
+# No env vars needed, just run the app!
+# ============================================
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/BlogV2Testing
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6399
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web: DEBUG
+
+# Dev-only JWT secret (DO NOT use in production)
+jwt:
+  secret: ZGV2LW9ubHktc2VjcmV0LWtleS1mb3ItbG9jYWwtdGVzdGluZy1vbmx5LWRvLW5vdC11c2UtaW4tcHJvZA==
+
+# Dev-only ImageKit defaults (override with env vars if needed)
+imagekit:
+  public-key: public_tyrM4mZBoHEn2G9H58kxN3Td454=
+  private-key: private_pEisAjFDJMqxdJv8c0TRzUJ3K7g=
+  url-endpoint: https://ik.imagekit.io/ew8wnk3vr
+
+server:
+  error:
+    include-message: always
+  port: 8091

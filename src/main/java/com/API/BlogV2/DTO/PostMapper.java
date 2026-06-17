@@ -7,7 +7,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import org.springframework.context.annotation.Bean;
 
-@Mapper(componentModel = "spring") // This makes it a Spring Bean (@Component)
+@Mapper(componentModel = "spring")
 public interface PostMapper {
 
     // 1. Map Entity to DTO

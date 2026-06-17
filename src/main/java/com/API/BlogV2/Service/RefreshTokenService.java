@@ -1,5 +1,8 @@
 package com.API.BlogV2.Service;
 
+import com.API.BlogV2.Exception.ResourceNotFoundException;
+import com.API.BlogV2.Exception.BlogAPIException;
+import org.springframework.http.HttpStatus;
 import com.API.BlogV2.Entity.RefreshToken;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Repository.RefreshTokenRepository;
@@ -32,7 +35,7 @@ public class RefreshTokenService {
     public RefreshToken createRefreshToken(Long userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         // Optional: delete old token (one token per user)
         refreshTokenRepository.deleteByUser(user);
@@ -59,7 +62,7 @@ public class RefreshTokenService {
 
         if (token.getExpiryDate().before(new Date())) {
             refreshTokenRepository.delete(token);
-            throw new RuntimeException("Refresh token expired. Please login again.");
+            throw new BlogAPIException(HttpStatus.UNAUTHORIZED, "Refresh token expired. Please login again.");
         }
 
         return token;
@@ -69,7 +72,7 @@ public class RefreshTokenService {
     public void deleteByUserId(Long userId) {
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         refreshTokenRepository.deleteByUser(user);
     }

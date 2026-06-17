@@ -3,7 +3,9 @@ package com.API.BlogV2.DTO;
 import com.API.BlogV2.Entity.Post;
 import com.API.BlogV2.Entity.User;
 
-public class CommentDTO {
+import java.io.Serializable;
+
+public class CommentDTO implements Serializable {
     private String content;
     private Long userId;
     private Long postId;
