@@ -1,6 +1,7 @@
-# 📝 Blog REST API
+# 📝 Blog Backend System using REST API
 
 A production-ready **RESTful Blog API** built with **Java 17**, **Spring Boot 4**, and **PostgreSQL** — featuring JWT-based authentication, Refresh Tokens, role-based access control, ImageKit integration, DTO pattern, input validation, and paginated responses.
+Built a production-ready backend system for a RESTful Blog API using Java 17, Spring Boot 4, and PostgreSQL, with JWT authentication, role-based access, validation, and pagination.
 
 ![In Progress](https://img.shields.io/badge/Status-Active-green?style=flat-square)
 ![REST API](https://img.shields.io/badge/Type-REST%20API-blue?style=flat-square)
@@ -28,6 +29,15 @@ A production-ready **RESTful Blog API** built with **Java 17**, **Spring Boot 4*
 - 📃 **Pagination & Sorting** — Paginated responses for posts and comments.
 - 📖 **OpenAPI / Swagger** — Auto-generated, interactive API documentation.
 - 🐳 **Dockerized** — Fully containerized setup with Docker Compose for Postgres and the app.
+- 🔐 **JWT Authentication** — Secure login and token-based session management using `jjwt 0.12.6`
+- 🛡️ **Spring Security** — Role-based access control (e.g. Admin vs. User)
+- 📄 **Blog Post CRUD** — Create, read, update, and delete blog posts
+- 💬 **Comments** — Nested comment support per post
+- 📦 **DTO Pattern** — Clean separation between API layer and database entities
+- ✅ **Input Validation** — Bean Validation (`@Valid`) on all request bodies
+- 📃 **Pagination & Sorting** — Paginated responses for posts and comments
+- 🗄️ **PostgreSQL** — Persistent relational data storage via Spring Data JPA
+- 🖼️ **ImageKit** — Uploading of user profile and post cover images.
 
 ---
 
@@ -45,6 +55,7 @@ A production-ready **RESTful Blog API** built with **Java 17**, **Spring Boot 4*
 | Mapping | MapStruct |
 | Docs | Springdoc OpenAPI (Swagger UI) |
 | Cloud Storage | ImageKit |
+| Image Upload | ImageKit.io |
 
 ---
 
@@ -98,6 +109,22 @@ Run the application and database using Docker Compose:
 
 ```bash
 docker-compose up --build
+Update `src/main/resources/application.properties`:
+
+```properties
+spring.application.name=BlogV2
+spring.datasource.url=jdbc:postgresql://localhost:5433/DB_Name
+spring.datasource.username=username
+spring.datasource.password=password
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.properties.hibernate.format_sql=true
+server.error.include-message=always
+server.port=8083
+imagekit.public-key=your-public_key
+imagekit.private-key=your-private_key
+imagekit.url-endpoint=https://ik.imagekit.io/yourId
 ```
 The API will start at `http://localhost:9080` (or `8090` based on port mapping).
 
