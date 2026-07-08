@@ -1,6 +1,7 @@
 package com.API.BlogV2.DTO;
 
 import com.API.BlogV2.Entity.CategoryType;
+import com.API.BlogV2.Entity.PostStatus;
 import com.API.BlogV2.Entity.User;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -22,6 +23,12 @@ public class PostRequestDTO {
     private Set<CategoryType> categories = new HashSet<>();
 
     private String coverImageUrl;
+
+    // Publishing state: DRAFT (default), PUBLISHED, or ARCHIVED
+    private PostStatus status = PostStatus.DRAFT;
+
+    // Free-form tags (e.g., ["java", "springboot"])
+    private Set<String> tags = new HashSet<>();
 
     public String getCoverImageUrl() { return coverImageUrl; }
     public void setCoverImageUrl(String coverImageUrl) { this.coverImageUrl = coverImageUrl; }
@@ -48,5 +55,21 @@ public class PostRequestDTO {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public PostStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PostStatus status) {
+        this.status = status;
+    }
+
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
     }
 }

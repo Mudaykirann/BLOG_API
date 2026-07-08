@@ -1,6 +1,7 @@
 package com.API.BlogV2.DTO;
 
 import com.API.BlogV2.Entity.CategoryType;
+import com.API.BlogV2.Entity.PostStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -27,6 +28,12 @@ public class PostResponseDTO implements Serializable {
 
 
     private String coverImageUrl;
+
+    // Publishing status (DRAFT / PUBLISHED / ARCHIVED)
+    private PostStatus status;
+
+    // Free-form tags
+    private Set<String> tags;
 
 
 
@@ -105,5 +112,21 @@ public class PostResponseDTO implements Serializable {
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public PostStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PostStatus status) {
+        this.status = status;
+    }
+
+    public Set<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<String> tags) {
+        this.tags = tags;
     }
 }

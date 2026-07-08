@@ -20,4 +20,5 @@ public interface PostService {
     List<PostResponseDTO> getPostsByCategory(String categoryName);
     PostResponseDTO updateCoverImage(Long postId, String imageUrl);
     String getCoverThumbnail(Long postId, int width, int height);
+    List<PostResponseDTO> getPostsByTag(String tag);
 }

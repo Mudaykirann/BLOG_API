@@ -7,10 +7,12 @@ import com.API.BlogV2.Exception.BlogAPIException;
 import com.API.BlogV2.DTO.*;
 import com.API.BlogV2.Entity.CategoryType;
 import com.API.BlogV2.Entity.Post;
+import com.API.BlogV2.Entity.PostStatus;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Entity.UserPrincple;
 import com.API.BlogV2.Repository.PostRepository;
 import com.API.BlogV2.Repository.UserRepository;
+import com.API.BlogV2.Utils.HtmlSanitizerUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,8 +40,9 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final ImageKitService imageKitService; // inject this
+    private final ImageKitService imageKitService;
     private final PostMapper postMapper;
+    private final HtmlSanitizerUtil htmlSanitizerUtil;
 
 
 
@@ -55,32 +58,35 @@ public class PostServiceImpl implements PostService {
 
         Post p = new Post();
         p.setTitle(postRequestDTO.getTitle());
-        p.setContent(postRequestDTO.getContent());
+        // Sanitize content to strip any XSS before persisting
+        p.setContent(htmlSanitizerUtil.sanitize(postRequestDTO.getContent()));
         p.setUser(user);
         p.setCoverImageUrl(postRequestDTO.getCoverImageUrl());
+        // Use the status from the request (DRAFT by default if not provided)
+        p.setStatus(postRequestDTO.getStatus() != null ? postRequestDTO.getStatus() : PostStatus.DRAFT);
 
-
-        // DEBUG: Print here to see if the DTO is actually receiving data from Postman
         log.info("Categories from DTO: {}", postRequestDTO.getCategories());
-
-        if(postRequestDTO.getCategories() != null){
+        if (postRequestDTO.getCategories() != null) {
             p.getCategories().addAll(postRequestDTO.getCategories());
+        }
+
+        // Save tags
+        if (postRequestDTO.getTags() != null) {
+            p.getTags().addAll(postRequestDTO.getTags());
         }
 
         Post savedPost = postRepository.save(p);
         log.info("Saved Post Categories: {}", savedPost.getCategories());
+        log.info("Saved Post Tags: {}", savedPost.getTags());
     }
 
 
     @Cacheable(value = "userPosts", key = "#userId + '_' + #page + '_' + #size")
-    @Transactional()  // ensures the session stays open to fetch lazy-loaded comments
+    @Transactional()
     public PageResponseDTO<PostResponseDTO> getPostsByUserId(Long userId, int page, int size) {
-
-        Pageable pageable = PageRequest.of(page,size, Sort.by("id").descending());
-
-        Page<Post> postPage = postRepository.findByUserId(userId,pageable);
-
-        // this is where DTO comes into picture , observer the mapToDTO
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
+        // Fetch all statuses for this author so they can manage drafts
+        Page<Post> postPage = postRepository.findByUserId(userId, pageable);
         Page<PostResponseDTO> mappedPage = postPage.map(postMapper::mapToDTO);
         return new PageResponseDTO<>(
                 mappedPage.getContent(),
@@ -96,11 +102,10 @@ public class PostServiceImpl implements PostService {
     @Cacheable(value = "allPosts", key = "#page + '_' + #size")
     @Transactional()
     public PageResponseDTO<PostResponseDTO> getAllPosts(int page, int size) {
-
-
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").descending());
-
-        Page<PostResponseDTO> mappedPage = postRepository.findAll(pageable)
+        // Public feed: PUBLISHED posts only
+        Page<PostResponseDTO> mappedPage = postRepository
+                .findAllByStatus(PostStatus.PUBLISHED, pageable)
                 .map(postMapper::mapToDTO);
         return new PageResponseDTO<>(
                 mappedPage.getContent(),
@@ -121,17 +126,12 @@ public class PostServiceImpl implements PostService {
     })
     @Transactional
     public void updatePost(Long id, PostRequestDTO dto) throws AccessDeniedException {
-
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
 
         UserPrincple userDetails = (UserPrincple) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-
+                .getContext().getAuthentication().getPrincipal();
         Long currentUserId = userDetails.getId();
-
         boolean isAdmin = userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
@@ -140,11 +140,23 @@ public class PostServiceImpl implements PostService {
         }
 
         post.setTitle(dto.getTitle());
-        post.setContent(dto.getContent());
+        // Sanitize content on update as well
+        post.setContent(htmlSanitizerUtil.sanitize(dto.getContent()));
 
         if (dto.getCategories() != null) {
             post.getCategories().clear();
             post.getCategories().addAll(dto.getCategories());
+        }
+
+        // Update tags
+        if (dto.getTags() != null) {
+            post.getTags().clear();
+            post.getTags().addAll(dto.getTags());
+        }
+
+        // Update publishing status if provided
+        if (dto.getStatus() != null) {
+            post.setStatus(dto.getStatus());
         }
 
         postRepository.save(post);
@@ -175,24 +187,32 @@ public class PostServiceImpl implements PostService {
     }
 
 
+    // Search — only PUBLISHED posts are visible
     @Cacheable(value = "postSearch", key = "#keyword")
     @Transactional()
     public List<PostResponseDTO> searchPostByTitle(String keyword) {
-
-        return postRepository.findByTitleContainingIgnoreCase(keyword)
+        return postRepository.findByTitleContainingIgnoreCaseAndStatus(keyword, PostStatus.PUBLISHED)
                 .stream()
                 .map(postMapper::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    // Filter posts by category
+    // Filter by category — only PUBLISHED
     @Cacheable(value = "postsByCategory", key = "#categoryName")
     @Transactional()
     public List<PostResponseDTO> getPostsByCategory(String categoryName) {
-
         CategoryType category = CategoryType.valueOf(categoryName.toUpperCase());
+        return postRepository.findByCategoryAndStatus(category, PostStatus.PUBLISHED)
+                .stream()
+                .map(postMapper::mapToDTO)
+                .collect(Collectors.toList());
+    }
 
-        return postRepository.findByCategoriesContaining(category)
+    // Filter by tag — only PUBLISHED
+    @Cacheable(value = "postsByTag", key = "#tag")
+    @Transactional()
+    public List<PostResponseDTO> getPostsByTag(String tag) {
+        return postRepository.findByTagAndStatus(tag.toLowerCase(), PostStatus.PUBLISHED)
                 .stream()
                 .map(postMapper::mapToDTO)
                 .collect(Collectors.toList());

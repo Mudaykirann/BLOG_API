@@ -65,6 +65,17 @@ public class Post {
     @Column(name = "cover_image_url")
     private String coverImageUrl;       // Full ImageKit URL stored here
 
+    // Publishing status — defaults to DRAFT so new posts are not immediately public
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private PostStatus status = PostStatus.DRAFT;
+
+    // Free-form tags (e.g., "java", "springboot"). Stored in a separate post_tags join table.
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "post_tags", joinColumns = @JoinColumn(name = "post_id"))
+    @Column(name = "tag", length = 50)
+    private Set<String> tags = new HashSet<>();
+
 
 
 
