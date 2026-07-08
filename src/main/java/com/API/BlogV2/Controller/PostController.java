@@ -97,9 +97,20 @@ public class PostController {
     }
 
     @GetMapping(path = "/posts/category/{category}")
-    public  ResponseEntity<UnifiedResponse<List<PostResponseDTO>>> getPostsByCategory(@PathVariable("category") String category){
+    public ResponseEntity<UnifiedResponse<List<PostResponseDTO>>> getPostsByCategory(@PathVariable("category") String category) {
         List<PostResponseDTO> categoryPosts = postService.getPostsByCategory(category);
-        return ResponseEntity.ok(UnifiedResponse.ok( "Posts fetched successfully", categoryPosts));
+        return ResponseEntity.ok(UnifiedResponse.ok("Posts fetched successfully", categoryPosts));
+    }
+
+    /**
+     * GET /api/v1/posts/tags/{tag}
+     * Filter published posts by a free-form tag (e.g., "java", "springboot").
+     * Tag matching is case-insensitive.
+     */
+    @GetMapping(path = "/posts/tags/{tag}")
+    public ResponseEntity<UnifiedResponse<List<PostResponseDTO>>> getPostsByTag(@PathVariable("tag") String tag) {
+        List<PostResponseDTO> taggedPosts = postService.getPostsByTag(tag);
+        return ResponseEntity.ok(UnifiedResponse.ok("Posts fetched successfully", taggedPosts));
     }
 
     // In your existing PostController.java — ADD these endpoints
@@ -111,7 +122,7 @@ public class PostController {
 
         String imageUrl = body.get("imageUrl"); // URL returned by ImageKit after upload
         PostResponseDTO updated = postService.updateCoverImage(id, imageUrl);
-        return ResponseEntity.ok(UnifiedResponse.ok("Cover image updated successfully", updated));
+        return ResponseEntity.ok(UnifiedResponse.ok("Coverf image updated successfully", updated));
     }
 
     @GetMapping("/posts/{id}/cover-image/thumbnail")

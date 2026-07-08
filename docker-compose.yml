@@ -24,7 +24,7 @@ services:
     container_name: blogv2-redis
     image: redis:7-alpine
     ports:
-      - "6399:6379"
+      - "6400:6379"
     networks:
       - blogv2-network
     healthcheck:
@@ -49,12 +49,16 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/BlogV2Testing
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_DATA_REDIS_HOST: redis-cache
+      SPRING_DATA_REDIS_HOST: blogv2-redis
       SPRING_DATA_REDIS_PORT: 6379
+      SPRING_REDIS_HOST: blogv2-redis
+      SPRING_REDIS_PORT: 6379
       JWT_SECRET: ${JWT_SECRET}
       IMAGEKIT_PUBLIC_KEY: ${IMAGEKIT_PUBLIC}
       IMAGEKIT_PRIVATE_KEY: ${IMAGEKIT_PRIVATE}
       IMAGEKIT_URL_ENDPOINT: ${IMAGEKIT_URL}
+      ADMIN_SECRET: ${ADMIN_SECRET}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
     networks:
       - blogv2-network
 
