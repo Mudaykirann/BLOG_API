@@ -8,8 +8,15 @@ import com.API.BlogV2.DTO.PageResponseDTO;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import com.API.BlogV2.DTO.PostSummaryDTO;
+import com.API.BlogV2.DTO.PostDetailDTO;
+import org.springframework.data.domain.Pageable;
 
 public interface PostService {
+    PageResponseDTO<PostSummaryDTO> getAllPostsSummary(Pageable pageable);
+    PostDetailDTO getPostDetailBySlug(String slug);
+    void incrementViewCountAsync(String slug);
+
     void addNewPost(Long userId, PostRequestDTO postRequestDTO);
     PageResponseDTO<PostResponseDTO> getPostsByUserId(Long userId, int page, int size);
     PageResponseDTO<PostResponseDTO> getAllPosts(int page, int size);

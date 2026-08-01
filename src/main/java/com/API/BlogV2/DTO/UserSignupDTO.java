@@ -28,6 +28,8 @@ public class UserSignupDTO {
     @Size(min = 5, max = 100)
     private String displayName;
 
+    private String adminSecret;
+
     // getters & setters
 
 
@@ -77,5 +79,13 @@ public class UserSignupDTO {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getAdminSecret() {
+        return adminSecret;
+    }
+
+    public void setAdminSecret(String adminSecret) {
+        this.adminSecret = adminSecret;
     }
 }

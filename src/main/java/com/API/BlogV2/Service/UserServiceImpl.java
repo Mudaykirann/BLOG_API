@@ -39,9 +39,12 @@ public class UserServiceImpl implements UserService {
 
     private final JWTService jwtService;
 
-
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
+
+    @org.springframework.beans.factory.annotation.Value("${app.admin.secret}")
+    private String adminSecret;
 
     public void registerUser(UserSignupDTO dto) {
 
@@ -55,7 +58,13 @@ public class UserServiceImpl implements UserService {
         user.setBio(dto.getBio());
         user.setOccupation(dto.getOccupation());
         user.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
-        user.setRole(Role.USER);
+
+        if (dto.getAdminSecret() != null && dto.getAdminSecret().equals(this.adminSecret)) {
+            user.setRole(Role.ADMIN);
+        } else {
+            user.setRole(Role.USER);
+        }
+
         user.setDisplayName(dto.getDisplayName());
         userRepository.save(user);
     }
@@ -136,5 +145,13 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         return imageKitService.getTransformedUrl(user.getProfilePicUrl(), width, height);
+    }
+
+    @Transactional
+    public void updateUserRole(Long userId, Role role) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        user.setRole(role);
+        userRepository.save(user);
     }
 }

@@ -15,7 +15,10 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
@@ -49,6 +52,7 @@ public class RefreshTokenService {
                 new Date(System.currentTimeMillis() + refreshTokenDurationMs)
         );
 
+        log.info("Created new refresh token for userId={}", userId);
         return refreshTokenRepository.saveAndFlush(refreshToken);
     }
 
@@ -61,6 +65,7 @@ public class RefreshTokenService {
     public RefreshToken verifyExpiration(RefreshToken token) {
 
         if (token.getExpiryDate().before(new Date())) {
+            log.warn("Refresh token expired for user id={}", token.getUser().getId());
             refreshTokenRepository.delete(token);
             throw new BlogAPIException(HttpStatus.UNAUTHORIZED, "Refresh token expired. Please login again.");
         }

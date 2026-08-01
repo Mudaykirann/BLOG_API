@@ -24,10 +24,16 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import com.API.BlogV2.Utils.CookieUtil;
 
+
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping(path = "api/v1")
+@Slf4j
 public class UserController {
 
     private  final UserService userService;
@@ -41,6 +47,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CookieUtil cookieUtil;
 
 
     @Autowired
@@ -62,19 +71,23 @@ public class UserController {
     }
 
     @PostMapping(path = "/auth/login")
-    public ResponseEntity<UnifiedResponse<TokenResponse>> login(@RequestBody LoginDTO u) {
+    public ResponseEntity<UnifiedResponse<String>> login(@RequestBody LoginDTO u) {
         String token = userService.verifyUser(u);
-
 
         User authenticatedUser = userRepository.findByEmail(u.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", u.getEmail()));
 
-        // 3. Use the ID directly from the object - No more Long.parseLong(null)!
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(authenticatedUser.getId());
 
-        TokenResponse responseData = new TokenResponse(token, refreshToken.getToken(),authenticatedUser.getId());
+        // Create Secure HttpOnly Cookies for XSS protection
+        ResponseCookie jwtCookie = cookieUtil.createHttpOnlyCookie("accessToken", token, 15 * 60); // 15 mins
+        ResponseCookie refreshCookie = cookieUtil.createHttpOnlyCookie("refreshToken", refreshToken.getToken(), 7 * 24 * 60 * 60); // 7 days
 
-        return ResponseEntity.ok(UnifiedResponse.ok("Token Fetched successfully",responseData));
+        log.info("User {} successfully logged in", u.getEmail());
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(UnifiedResponse.ok("Login successful", authenticatedUser.getId().toString()));
     }
 
     @PostMapping("/auth/register")
@@ -103,15 +116,26 @@ public class UserController {
 
     @PostMapping("/auth/logout")
     public ResponseEntity<UnifiedResponse<String>> logout() {
-        // 1. Get the current user from SecurityContext
-        UserPrincple userDetails = (UserPrincple) SecurityContextHolder
-                .getContext().getAuthentication().getPrincipal();
+        // 1. Get the current user from SecurityContext safely
+        org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        User user = userRepository.findById(userDetails.getId()).get();
+        if (auth != null && auth.getPrincipal() instanceof UserPrincple) {
+            UserPrincple userDetails = (UserPrincple) auth.getPrincipal();
+            userRepository.findById(userDetails.getId()).ifPresent(user -> {
+                // 2. Delete the refresh token from DB if user exists
+                refreshTokenService.deleteByUser(user);
+            });
+        }
 
-        // 2. Delete the refresh token from DB
-        refreshTokenService.deleteByUser(user);
-        return ResponseEntity.ok(UnifiedResponse.ok("Logged out successfully. Refresh token invalidated.",null));
+        // 3. Clear the cookies by setting maxAge to 0 (always do this to ensure client state is cleared)
+        ResponseCookie jwtCookie = cookieUtil.createHttpOnlyCookie("accessToken", "", 0);
+        ResponseCookie refreshCookie = cookieUtil.createHttpOnlyCookie("refreshToken", "", 0);
+
+        log.info("User successfully logged out");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(UnifiedResponse.ok("Logged out successfully. Tokens invalidated.",null));
     }
 
 
@@ -124,6 +148,18 @@ public class UserController {
         String imageUrl = body.get("imageUrl"); // URL returned by ImageKit after upload
         UserDTO updated = userService.updateProfilePic(id, imageUrl);
         return ResponseEntity.ok(UnifiedResponse.ok("Profile pic updated successfully", updated));
+    }
+
+    @PatchMapping("/users/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UnifiedResponse<Void>> updateUserRole(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+
+        String roleStr = body.get("role");
+        Role role = Role.valueOf(roleStr.toUpperCase());
+        userService.updateUserRole(id, role);
+        return ResponseEntity.ok(UnifiedResponse.ok("User role updated to " + role, null));
     }
 
     @GetMapping("/users/{id}/profile-pic/thumbnail")

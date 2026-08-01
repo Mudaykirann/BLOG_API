@@ -35,6 +35,9 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
+
     @Bean // Tells Spring to manage the return value of this method as a Bean (the main security config)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -83,7 +86,8 @@ public class SecurityConfig {
 
                 // Configures session policy; NEVER means Spring won't create a session, but will use one if it exists
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtFilter,UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class) // Brute force protection
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // JWT processing
                 // Finalizes the configuration and returns the built SecurityFilterChain object
                 .build();
     }
@@ -113,7 +117,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // Match your Vite port
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5174"));
 
         // Define allowed methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

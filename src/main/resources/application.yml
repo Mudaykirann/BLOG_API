@@ -8,3 +8,7 @@ imagekit:
   public-key: ${IMAGEKIT_PUBLIC_KEY}
   private-key: ${IMAGEKIT_PRIVATE_KEY}
   url-endpoint: ${IMAGEKIT_URL_ENDPOINT}
+
+app:
+  admin:
+    secret: ${ADMIN_SECRET:default_admin_secret}
