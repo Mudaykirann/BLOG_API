@@ -14,8 +14,10 @@ import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.Map;
 import java.util.UUID;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 public class ImageKitService {
 
     private final ImageKitConfig config;
@@ -59,6 +61,7 @@ public class ImageKitService {
             authParams.put("publicKey", config.getPublicKey());       // handy for frontend
             authParams.put("urlEndpoint", config.getUrlEndpoint());   // handy for frontend
 
+            log.info("Generated ImageKit auth params");
             return authParams;
 
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {

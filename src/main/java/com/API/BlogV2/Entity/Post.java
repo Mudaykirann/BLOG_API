@@ -10,7 +10,9 @@ import jakarta.persistence.*;
 import java.util.*;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "posts", indexes = {
+        @Index(name = "idx_post_slug", columnList = "slug", unique = true)
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,6 +31,9 @@ public class Post {
     @Column(nullable = false, length = 200)
     private String title;
 
+    @Column(nullable = false, unique = true, length = 255)
+    private String slug;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
@@ -39,6 +44,10 @@ public class Post {
     private Date updatedAt;
 
     private int commentCount = 0;
+
+    private int viewCount = 0;
+
+    private int likeCount = 0;
 
     // Relationship with User (author of post)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

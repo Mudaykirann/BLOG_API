@@ -13,6 +13,7 @@ import com.API.BlogV2.Entity.UserPrincple;
 import com.API.BlogV2.Repository.PostRepository;
 import com.API.BlogV2.Repository.UserRepository;
 import com.API.BlogV2.Utils.HtmlSanitizerUtil;
+import com.API.BlogV2.Utils.SlugGenerator;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -43,6 +44,7 @@ public class PostServiceImpl implements PostService {
     private final ImageKitService imageKitService;
     private final PostMapper postMapper;
     private final HtmlSanitizerUtil htmlSanitizerUtil;
+    private final SlugGenerator slugGenerator;
 
 
 
@@ -60,6 +62,7 @@ public class PostServiceImpl implements PostService {
         p.setTitle(postRequestDTO.getTitle());
         // Sanitize content to strip any XSS before persisting
         p.setContent(htmlSanitizerUtil.sanitize(postRequestDTO.getContent()));
+        p.setSlug(slugGenerator.generateUniqueSlug(postRequestDTO.getTitle()));
         p.setUser(user);
         p.setCoverImageUrl(postRequestDTO.getCoverImageUrl());
         // Use the status from the request (DRAFT by default if not provided)
@@ -78,6 +81,60 @@ public class PostServiceImpl implements PostService {
         Post savedPost = postRepository.save(p);
         log.info("Saved Post Categories: {}", savedPost.getCategories());
         log.info("Saved Post Tags: {}", savedPost.getTags());
+        log.info("Post created: slug={}", savedPost.getSlug());
+    }
+
+    @Override
+    @Transactional
+    public PageResponseDTO<PostSummaryDTO> getAllPostsSummary(Pageable pageable) {
+        Page<PostSummaryDTO> mappedPage = postRepository.findProjectedByStatus(PostStatus.PUBLISHED, pageable);
+        return new PageResponseDTO<>(
+                mappedPage.getContent(),
+                mappedPage.getNumber(),
+                mappedPage.getSize(),
+                mappedPage.getTotalElements(),
+                mappedPage.getTotalPages(),
+                mappedPage.isLast()
+        );
+    }
+
+    @Override
+    @Cacheable(value = "postBySlug", key = "#slug")
+    @Transactional
+    public PostDetailDTO getPostDetailBySlug(String slug) {
+        Post post = postRepository.findBySlugWithTagsAndComments(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Post", "slug", slug));
+
+        List<CommentDTO> commentDTOs = post.getComments().stream().map(c -> {
+            CommentDTO dto = new CommentDTO();
+            dto.setId(c.getId());
+            dto.setContent(c.getContent());
+            dto.setAuthorName(c.getUser().getDisplayName());
+            dto.setCreatedAt(c.getCreatedAt());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return new PostDetailDTO(
+                post.getId(),
+                post.getTitle(),
+                post.getSlug(),
+                post.getContent(),
+                post.getUser().getDisplayName(),
+                post.getUser().getBio(),
+                post.getCoverImageUrl(),
+                new java.util.HashSet<>(post.getTags()),
+                commentDTOs,
+                post.getCreatedAt(),
+                post.getUpdatedAt(),
+                post.getViewCount(),
+                post.getLikeCount()
+        );
+    }
+
+    @Override
+    @org.springframework.scheduling.annotation.Async
+    public void incrementViewCountAsync(String slug) {
+        postRepository.incrementViewCountBySlug(slug);
     }
 
 
@@ -122,7 +179,8 @@ public class PostServiceImpl implements PostService {
             @CacheEvict(value = "allPosts", allEntries = true),
             @CacheEvict(value = "userPosts", allEntries = true),
             @CacheEvict(value = "postSearch", allEntries = true),
-            @CacheEvict(value = "postsByCategory", allEntries = true)
+            @CacheEvict(value = "postsByCategory", allEntries = true),
+            @CacheEvict(value = "postBySlug", allEntries = true)
     })
     @Transactional
     public void updatePost(Long id, PostRequestDTO dto) throws AccessDeniedException {
@@ -160,13 +218,15 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.save(post);
+        log.info("Post updated: id={}", id);
     }
     @Caching(evict = {
             @CacheEvict(value = "post", key = "#id"),
             @CacheEvict(value = "allPosts", allEntries = true),
             @CacheEvict(value = "userPosts", allEntries = true),
             @CacheEvict(value = "postSearch", allEntries = true),
-            @CacheEvict(value = "postsByCategory", allEntries = true)
+            @CacheEvict(value = "postsByCategory", allEntries = true),
+            @CacheEvict(value = "postBySlug", allEntries = true)
     })
     public void deletePost(Long id) {
 
@@ -174,6 +234,7 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
 
         postRepository.delete(post);
+        log.info("Post deleted: id={}", id);
     }
 
     @Cacheable(value = "post", key = "#id")

@@ -61,6 +61,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setPost(post);
         comment.setUser(user);
         commentRepository.save(comment);
+        log.info("Comment added to postId={} by userId={}", postId, userId);
     }
 
     @Transactional
@@ -84,6 +85,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         comment.setContent(newContent);
+        log.info("Comment updated: commentId={}", commentId);
     }
 
 
@@ -111,7 +113,6 @@ public class CommentServiceImpl implements CommentService {
 
         // 5. Perform deletion
         commentRepository.delete(comment);
-
-
+        log.info("Comment deleted: commentId={}", commentId);
     }
 }

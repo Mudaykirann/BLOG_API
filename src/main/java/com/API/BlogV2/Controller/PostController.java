@@ -11,7 +11,12 @@ import jakarta.validation.Valid;
 import jdk.dynalink.linker.LinkerServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import com.API.BlogV2.DTO.PageResponseDTO;
+import com.API.BlogV2.DTO.PostSummaryDTO;
+import com.API.BlogV2.DTO.PostDetailDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,18 +39,31 @@ public class PostController {
     }
 
     @GetMapping(path = "/posts")
-    public ResponseEntity<UnifiedResponse<PageResponseDTO<PostResponseDTO>>> getAllPosts(
+    public ResponseEntity<UnifiedResponse<PageResponseDTO<PostSummaryDTO>>> getPostsSummary(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size
-    ){
-        PageResponseDTO<PostResponseDTO> allPosts = postService.getAllPosts(page, size);
-        return ResponseEntity.ok(UnifiedResponse.ok("Post retrieved", allPosts));
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt,desc") String sort) {
+
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+
+        PageResponseDTO<PostSummaryDTO> response = postService.getAllPostsSummary(pageable);
+        return ResponseEntity.ok(UnifiedResponse.ok("Posts retrieved successfully", response));
     }
 
 
-    @GetMapping(path= "posts/{post_id}")
+    @GetMapping(path= "/posts/id/{post_id}")
     public ResponseEntity<PostResponseDTO> getPostById(@PathVariable Long post_id) {
         return ResponseEntity.ok(postService.getPostById(post_id));
+    }
+
+    @GetMapping(path= "/posts/{slug:[a-zA-Z0-9-]+}")
+    public ResponseEntity<UnifiedResponse<PostDetailDTO>> getPostDetail(@PathVariable String slug) {
+        PostDetailDTO detail = postService.getPostDetailBySlug(slug);
+        postService.incrementViewCountAsync(slug);
+        return ResponseEntity.ok(UnifiedResponse.ok("Post retrieved successfully", detail));
     }
 
     @GetMapping(path = "/users/{userId}/posts")
