@@ -39,6 +39,7 @@ Whether you are building a headless CMS, a personal blog, or a large-scale publi
 ### 📊 Observability & DevOps
 - **Dockerized Architecture**: Fully containerized environment orchestrating the API, PostgreSQL, and Redis via `docker-compose`.
 - **Metrics & Monitoring**: Integrated Spring Boot Actuator with Micrometer. Exposes endpoints for **Prometheus** scraping.
+- **Structured JSON Logging**: Centralized logging via Logback and SLF4J with MDC correlation ID tracing across all requests.
 - **Grafana Dashboards**: Ready-to-use metrics pipeline to monitor JVM memory, HTTP request latency, and cache hit ratios.
 - **Swagger / OpenAPI 3**: Interactive, auto-generated API documentation available out-of-the-box.
 
@@ -56,6 +57,7 @@ Whether you are building a headless CMS, a personal blog, or a large-scale publi
 | **Security** | Spring Security, JWT, Bucket4j | Latest | Auth & Rate Limiting |
 | **Media** | ImageKit | 3.0.0 | Cloud Image Storage & CDN |
 | **Monitoring** | Prometheus & Grafana | Latest | Telemetry & Observability |
+| **Logging** | Logback & SLF4J | Latest | Structured JSON Logging & MDC Tracing |
 | **Containerization**| Docker & Docker Compose | 3.8 | Orchestration |
 | **Documentation** | Springdoc OpenAPI | 2.8.0 | Swagger UI |
 
@@ -182,7 +184,7 @@ docker-compose up --build -d
 
 ---
 
-## 📊 Observability (Monitoring Pipeline)
+## 📊 Observability (Monitoring & Logging)
 
 BlogV2 is designed with DevSecOps in mind. Out of the box, it provides a comprehensive monitoring stack.
 - **Spring Boot Actuator** exposes `/actuator/prometheus` containing JVM, Tomcat, HikariCP, and HTTP metrics.
@@ -190,6 +192,11 @@ BlogV2 is designed with DevSecOps in mind. Out of the box, it provides a compreh
 - **Grafana** connects to Prometheus as a data source. 
   - To view metrics, navigate to `http://localhost:3000` (admin/admin).
   - You can import community dashboards like JVM (ID: `4701`) or Spring Boot Observability (ID: `11378`) to instantly visualize API health, latency, and throughput.
+
+### 📜 Structured Logging & Tracing
+- **JSON Format**: Uses `logstash-logback-encoder` to output logs in strict JSON format for easy ingestion by log aggregators (like ELK/EFK stack).
+- **Log Routing**: Automatically separates `application.log` (INFO+) and `error.log` (ERROR) into the `logs/` directory.
+- **MDC Correlation**: A custom `MdcCorrelationFilter` injects a unique UUID (`X-Correlation-Id`) into every request. This ID is included in all business logic and exception logs, providing end-to-end traceability for any transaction.
 
 ---
 
