@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.API.BlogV2.Entity.CategoryType;
 import java.io.Serializable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class PostDetailDTO implements Serializable {
     private String authorName;
     private String authorBio;
     private String coverImageUrl;
+    private Set<CategoryType> categories;
     private Set<String> tags;
     private List<CommentDTO> comments;
     private Date createdAt;

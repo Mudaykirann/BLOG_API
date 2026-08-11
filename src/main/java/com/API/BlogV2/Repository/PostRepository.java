@@ -21,11 +21,7 @@ import com.API.BlogV2.DTO.PostSummaryDTO;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    @Query("SELECT new com.API.BlogV2.DTO.PostSummaryDTO(" +
-           "p.id, p.title, p.slug, SUBSTRING(p.content, 1, 150), p.user.displayName, " +
-           "p.coverImageUrl, p.createdAt, p.commentCount, p.likeCount) " +
-           "FROM Post p WHERE p.status = :status")
-    Page<PostSummaryDTO> findProjectedByStatus(@Param("status") PostStatus status, Pageable pageable);
+
 
     @Query("SELECT DISTINCT p FROM Post p " +
            "LEFT JOIN FETCH p.tags " +

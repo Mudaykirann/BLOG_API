@@ -87,9 +87,25 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public PageResponseDTO<PostSummaryDTO> getAllPostsSummary(Pageable pageable) {
-        Page<PostSummaryDTO> mappedPage = postRepository.findProjectedByStatus(PostStatus.PUBLISHED, pageable);
+        Page<Post> mappedPage = postRepository.findAllByStatus(PostStatus.PUBLISHED, pageable);
+        List<PostSummaryDTO> dtoList = mappedPage.getContent().stream().map(p -> {
+            PostSummaryDTO dto = new PostSummaryDTO();
+            dto.setId(p.getId());
+            dto.setTitle(p.getTitle());
+            dto.setSlug(p.getSlug());
+            dto.setExcerpt(p.getContent() != null ? p.getContent().substring(0, Math.min(p.getContent().length(), 150)) : "");
+            dto.setAuthorName(p.getUser().getDisplayName());
+            dto.setCoverImageUrl(p.getCoverImageUrl());
+            dto.setPublishedAt(p.getCreatedAt());
+            dto.setCommentCount(p.getCommentCount());
+            dto.setLikeCount(p.getLikeCount());
+            dto.setCategories(new java.util.HashSet<>(p.getCategories()));
+            dto.setTags(new java.util.HashSet<>(p.getTags()));
+            return dto;
+        }).collect(Collectors.toList());
+
         return new PageResponseDTO<>(
-                mappedPage.getContent(),
+                dtoList,
                 mappedPage.getNumber(),
                 mappedPage.getSize(),
                 mappedPage.getTotalElements(),
@@ -122,6 +138,7 @@ public class PostServiceImpl implements PostService {
                 post.getUser().getDisplayName(),
                 post.getUser().getBio(),
                 post.getCoverImageUrl(),
+                new java.util.HashSet<>(post.getCategories()),
                 new java.util.HashSet<>(post.getTags()),
                 commentDTOs,
                 post.getCreatedAt(),
