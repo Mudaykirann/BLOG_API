@@ -38,6 +38,9 @@ public class SecurityConfig {
     @Autowired
     private RateLimitingFilter rateLimitingFilter;
 
+    @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
+    private String[] allowedOrigins;
+
     @Bean // Tells Spring to manage the return value of this method as a Bean (the main security config)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -116,8 +119,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Match your Vite port
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5174"));
+        // Match frontend dev servers via property
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
 
         // Define allowed methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));

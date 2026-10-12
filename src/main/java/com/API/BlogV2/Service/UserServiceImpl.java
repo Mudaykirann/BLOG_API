@@ -90,16 +90,18 @@ public class UserServiceImpl implements UserService {
     }
 
     public String verifyUser(LoginDTO u) {
-        Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(u.getName(),u.getPassword()));
-
         User user = userRepository.findByEmail(u.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", u.getEmail()));
 
-        if(auth.isAuthenticated()){
-            return jwtService.generateToken(u.getName(),user.getId());
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getName(), u.getPassword())
+        );
+
+        if (auth.isAuthenticated()) {
+            return jwtService.generateToken(user.getName(), user.getId());
         }
 
-        return "Fail";
+        throw new BlogAPIException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid credentials");
     }
 
 

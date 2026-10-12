@@ -168,6 +168,12 @@
             <version>7.4</version>
         </dependency>
 
+        <!-- Jackson Java 8 Date/Time (JSR-310) support -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

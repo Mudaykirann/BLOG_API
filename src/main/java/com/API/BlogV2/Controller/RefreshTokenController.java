@@ -1,11 +1,12 @@
 package com.API.BlogV2.Controller;
 
 import com.API.BlogV2.DTO.TokenRequest;
-import  com.API.BlogV2.Controller.TokenResponse;
 import com.API.BlogV2.Entity.RefreshToken;
 import com.API.BlogV2.Entity.User;
+import com.API.BlogV2.Exception.BlogAPIException;
 import com.API.BlogV2.Service.JWTService;
 import com.API.BlogV2.Service.RefreshTokenService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpHeaders;
@@ -35,13 +36,13 @@ public class RefreshTokenController {
             @CookieValue(name = "refreshToken", required = false) String requestRefreshToken) {
 
         if (requestRefreshToken == null || requestRefreshToken.isEmpty()) {
-            throw new RuntimeException("Refresh token is missing");
+            throw new BlogAPIException(HttpStatus.UNAUTHORIZED, "Refresh token is missing");
         }
 
         RefreshToken refreshToken = refreshTokenService.findByToken(requestRefreshToken)
                 .map(refreshTokenService::verifyExpiration)
                 .orElseThrow(() ->
-                        new RuntimeException("Refresh token is invalid or expired"));
+                        new BlogAPIException(HttpStatus.UNAUTHORIZED, "Refresh token is invalid or expired"));
 
         User user = refreshToken.getUser();
 

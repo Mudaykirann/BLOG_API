@@ -59,5 +59,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             @Param("tag") String tag,
             @Param("status") PostStatus status
     );
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :id")
+    void incrementLikeCount(@Param("id") Long id);
+
+    @Query(value = "SELECT * FROM posts p WHERE to_tsvector('english', p.title || ' ' || p.content) @@ plainto_tsquery('english', :keyword) AND p.status = 'PUBLISHED'", nativeQuery = true)
+    List<Post> searchByKeywordFTS(@Param("keyword") String keyword);
 }
 

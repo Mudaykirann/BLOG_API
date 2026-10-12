@@ -13,6 +13,8 @@ import com.API.BlogV2.Repository.CommentRepository;
 import com.API.BlogV2.Repository.PostRepository;
 import com.API.BlogV2.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,20 +52,35 @@ public class CommentServiceImpl implements CommentService {
     }
 
 
+    @Caching(evict = {
+            @CacheEvict(value = "postBySlug", allEntries = true),
+            @CacheEvict(value = "post", key = "#postId"),
+            @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "userPosts", allEntries = true)
+    })
     @Transactional
-    public  void addComment(Long postId,Long userId, String Content){
+    public void addComment(Long postId, Long userId, String Content){
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
-        User user = userRepository.getReferenceById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
         Comment comment = new Comment();
         comment.setContent(Content);
         comment.setPost(post);
         comment.setUser(user);
         commentRepository.save(comment);
+
+        post.setCommentCount(post.getCommentCount() + 1);
+        postRepository.save(post);
+
         log.info("Comment added to postId={} by userId={}", postId, userId);
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = "postBySlug", allEntries = true),
+            @CacheEvict(value = "post", key = "#postId")
+    })
     @Transactional
     public void updateComment(Long postId, Long userId, Long commentId, String newContent) {
 
@@ -89,8 +106,14 @@ public class CommentServiceImpl implements CommentService {
     }
 
 
+    @Caching(evict = {
+            @CacheEvict(value = "postBySlug", allEntries = true),
+            @CacheEvict(value = "post", key = "#postId"),
+            @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "userPosts", allEntries = true)
+    })
     @Transactional
-    public void deleteComment(Long postId, Long userId,Long commentId){
+    public void deleteComment(Long postId, Long userId, Long commentId){
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
         Comment comment = commentRepository.findById(commentId)
@@ -111,8 +134,11 @@ public class CommentServiceImpl implements CommentService {
             throw new BlogAPIException(org.springframework.http.HttpStatus.FORBIDDEN, "You are not authorized to delete this comment");
         }
 
-        // 5. Perform deletion
         commentRepository.delete(comment);
+
+        post.setCommentCount(Math.max(0, post.getCommentCount() - 1));
+        postRepository.save(post);
+
         log.info("Comment deleted: commentId={}", commentId);
     }
 }

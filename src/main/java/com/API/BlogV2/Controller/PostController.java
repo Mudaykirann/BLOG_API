@@ -77,7 +77,7 @@ public class PostController {
     }
 
     @PostMapping(path = "/users/{userId}/posts")
-    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #userId == authentication.principal.id)")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UnifiedResponse<Void>> addNewPost(
             @PathVariable("userId") Long userId,
             @Valid @RequestBody PostRequestDTO p
@@ -98,7 +98,7 @@ public class PostController {
     }
 
     @DeleteMapping(path = "/posts/{postid}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UnifiedResponse<Void>> deletePost(@PathVariable("postid") Long id) {
         // Note: It's safer to handle ownership logic inside postService.deletePost(id)
         // using SecurityContextHolder like you did in updatePost.
@@ -131,16 +131,23 @@ public class PostController {
         return ResponseEntity.ok(UnifiedResponse.ok("Posts fetched successfully", taggedPosts));
     }
 
+    @PostMapping(path = "/posts/{id}/like")
+    public ResponseEntity<UnifiedResponse<Void>> likePost(@PathVariable("id") Long id) {
+        postService.likePost(id);
+        return ResponseEntity.ok(UnifiedResponse.ok("Post liked successfully", null));
+    }
+
     // In your existing PostController.java — ADD these endpoints
 
     @PatchMapping("/posts/{id}/cover-image")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UnifiedResponse<PostResponseDTO>> updateCoverImage(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {
 
         String imageUrl = body.get("imageUrl"); // URL returned by ImageKit after upload
         PostResponseDTO updated = postService.updateCoverImage(id, imageUrl);
-        return ResponseEntity.ok(UnifiedResponse.ok("Coverf image updated successfully", updated));
+        return ResponseEntity.ok(UnifiedResponse.ok("Cover image updated successfully", updated));
     }
 
     @GetMapping("/posts/{id}/cover-image/thumbnail")

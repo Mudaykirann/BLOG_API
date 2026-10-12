@@ -49,6 +49,8 @@ public class Post {
 
     private int likeCount = 0;
 
+    private int readTime = 1;
+
     // Relationship with User (author of post)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

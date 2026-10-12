@@ -35,6 +35,8 @@ public class PostResponseDTO implements Serializable {
     // Free-form tags
     private Set<String> tags;
 
+    private int readTime;
+
 
 
 
@@ -128,5 +130,13 @@ public class PostResponseDTO implements Serializable {
 
     public void setTags(Set<String> tags) {
         this.tags = tags;
+    }
+
+    public int getReadTime() {
+        return readTime;
+    }
+
+    public void setReadTime(int readTime) {
+        this.readTime = readTime;
     }
 }

@@ -71,7 +71,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/auth/login")
-    public ResponseEntity<UnifiedResponse<String>> login(@RequestBody LoginDTO u) {
+    public ResponseEntity<UnifiedResponse<String>> login(@Valid @RequestBody LoginDTO u) {
         String token = userService.verifyUser(u);
 
         User authenticatedUser = userRepository.findByEmail(u.getEmail())
@@ -141,6 +141,7 @@ public class UserController {
 
     // In your existing UserController.java — ADD these endpoints
     @PatchMapping("/users/{id}/profile-pic")
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and #id == authentication.principal.id)")
     public ResponseEntity<UnifiedResponse<UserDTO>> updateProfilePic(
             @PathVariable Long id,
             @RequestBody Map<String, String> body) {

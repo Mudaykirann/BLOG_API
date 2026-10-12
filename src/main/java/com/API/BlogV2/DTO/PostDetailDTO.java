@@ -28,4 +28,5 @@ public class PostDetailDTO implements Serializable {
     private Date updatedAt;
     private int viewCount;
     private int likeCount;
+    private int readTime;
 }
