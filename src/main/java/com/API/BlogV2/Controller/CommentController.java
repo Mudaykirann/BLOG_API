@@ -38,7 +38,7 @@ public class CommentController {
 
     //create comments
     @PostMapping(path = "/posts/{postId}/comments")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Simple check; ID is handled inside
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UnifiedResponse<Void>> addNewComment(
             @PathVariable("postId") Long postId,
             @RequestBody Map<String ,String> requestBody
@@ -52,7 +52,7 @@ public class CommentController {
 
 
     @PutMapping(path = "posts/{postId}/comments/{comment_id}")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UnifiedResponse<Void>> updateComment(
             @PathVariable("postId") Long postId,
             @PathVariable("comment_id") Long comment_id,
@@ -69,7 +69,7 @@ public class CommentController {
     }
 
     @DeleteMapping(path = "/posts/{postId}/comments/{commentId}")
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN')") // Simple check; ID is handled inside
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UnifiedResponse<Void>> deleteComment(
             @PathVariable("postId") Long postId,
             @PathVariable("commentId") Long commentId

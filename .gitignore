@@ -35,3 +35,16 @@ build/
 
 application.properties
 .env
+
+
+.AWS_DEPLOYMENT_GUIDE.md
+.Auth_implementation_plan.md
+.CODEBASE_ANALYSIS.md
+.SAMPLE_POSTS_DATA.md
+.VULNERABILITIES_AND_IMPROVEMENTS.md
+.collection.json
+.collections.json
+.hs_err_pid21556.log
+.hs_err_pid3332.log
+.hs_err_pid8032.log
+        .replay_pid3332.log

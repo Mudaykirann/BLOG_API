@@ -2,7 +2,7 @@ package com.API.BlogV2.Service;
 
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Entity.UserPrincple;
-import com.API.BlogV2.Repository.UserRepo;
+import com.API.BlogV2.Repository.UserRepository;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,12 +15,12 @@ public class MyUserDetailsService implements UserDetailsService {
 
 
     @Autowired
-    private UserRepo userRepo;
+    private UserRepository userRepository;
 
     @Override
     @NullMarked
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepo.findByName(username);
+        User user = userRepository.findByName(username);
 
         if(user == null){
             throw  new UsernameNotFoundException("User Not Found Exception");

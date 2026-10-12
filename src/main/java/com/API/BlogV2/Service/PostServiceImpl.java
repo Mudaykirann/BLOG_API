@@ -46,6 +46,13 @@ public class PostServiceImpl implements PostService {
     private final HtmlSanitizerUtil htmlSanitizerUtil;
     private final SlugGenerator slugGenerator;
 
+    private int calculateReadTime(String htmlContent) {
+        if (htmlContent == null || htmlContent.isBlank()) return 1;
+        String text = htmlContent.replaceAll("<[^>]*>", "");
+        int wordCount = text.trim().split("\\s+").length;
+        return Math.max(1, (int) Math.ceil(wordCount / 200.0));
+    }
+
 
 
 
@@ -67,6 +74,7 @@ public class PostServiceImpl implements PostService {
         p.setCoverImageUrl(postRequestDTO.getCoverImageUrl());
         // Use the status from the request (DRAFT by default if not provided)
         p.setStatus(postRequestDTO.getStatus() != null ? postRequestDTO.getStatus() : PostStatus.DRAFT);
+        p.setReadTime(calculateReadTime(p.getContent()));
 
         log.info("Categories from DTO: {}", postRequestDTO.getCategories());
         if (postRequestDTO.getCategories() != null) {
@@ -101,6 +109,7 @@ public class PostServiceImpl implements PostService {
             dto.setLikeCount(p.getLikeCount());
             dto.setCategories(new java.util.HashSet<>(p.getCategories()));
             dto.setTags(new java.util.HashSet<>(p.getTags()));
+            dto.setReadTime(p.getReadTime());
             return dto;
         }).collect(Collectors.toList());
 
@@ -144,7 +153,8 @@ public class PostServiceImpl implements PostService {
                 post.getCreatedAt(),
                 post.getUpdatedAt(),
                 post.getViewCount(),
-                post.getLikeCount()
+                post.getLikeCount(),
+                post.getReadTime()
         );
     }
 
@@ -217,6 +227,7 @@ public class PostServiceImpl implements PostService {
         post.setTitle(dto.getTitle());
         // Sanitize content on update as well
         post.setContent(htmlSanitizerUtil.sanitize(dto.getContent()));
+        post.setReadTime(calculateReadTime(post.getContent()));
 
         if (dto.getCategories() != null) {
             post.getCategories().clear();
@@ -245,10 +256,21 @@ public class PostServiceImpl implements PostService {
             @CacheEvict(value = "postsByCategory", allEntries = true),
             @CacheEvict(value = "postBySlug", allEntries = true)
     })
+    @Transactional
     public void deletePost(Long id) {
 
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", id));
+
+        UserPrincple userDetails = (UserPrincple) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        Long currentUserId = userDetails.getId();
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!post.getUser().getId().equals(currentUserId) && !isAdmin) {
+            throw new BlogAPIException(org.springframework.http.HttpStatus.FORBIDDEN, "You do not have permission to delete this post");
+        }
 
         postRepository.delete(post);
         log.info("Post deleted: id={}", id);
@@ -269,7 +291,7 @@ public class PostServiceImpl implements PostService {
     @Cacheable(value = "postSearch", key = "#keyword")
     @Transactional()
     public List<PostResponseDTO> searchPostByTitle(String keyword) {
-        return postRepository.findByTitleContainingIgnoreCaseAndStatus(keyword, PostStatus.PUBLISHED)
+        return postRepository.searchByKeywordFTS(keyword)
                 .stream()
                 .map(postMapper::mapToDTO)
                 .collect(Collectors.toList());
@@ -296,6 +318,20 @@ public class PostServiceImpl implements PostService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "post", key = "#id"),
+            @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "postBySlug", allEntries = true)
+    })
+    public void likePost(Long id) {
+        if (!postRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Post", "id", id);
+        }
+        postRepository.incrementLikeCount(id);
+    }
+
 
     // In your existing PostService.java — ADD this method
 
@@ -304,10 +340,26 @@ public class PostServiceImpl implements PostService {
     /**
      * Called after frontend uploads the image and gets back a URL from ImageKit.
      */
-    @CacheEvict(value = "post", key = "#postId")
+    @Caching(evict = {
+            @CacheEvict(value = "post", key = "#postId"),
+            @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "userPosts", allEntries = true),
+            @CacheEvict(value = "postBySlug", allEntries = true)
+    })
+    @Transactional
     public PostResponseDTO updateCoverImage(Long postId, String imageUrl) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post", "id", postId));
+
+        UserPrincple userDetails = (UserPrincple) SecurityContextHolder
+                .getContext().getAuthentication().getPrincipal();
+        Long currentUserId = userDetails.getId();
+        boolean isAdmin = userDetails.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!post.getUser().getId().equals(currentUserId) && !isAdmin) {
+            throw new BlogAPIException(org.springframework.http.HttpStatus.FORBIDDEN, "You do not have permission to update this post's cover image");
+        }
 
         post.setCoverImageUrl(imageUrl);
         return postMapper.mapToDTO(postRepository.save(post));

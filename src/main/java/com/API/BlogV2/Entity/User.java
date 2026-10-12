@@ -80,10 +80,17 @@ public class User {
 
 
 
-    public String generateDisplayName(String name) {;
+    public String generateDisplayName(String name) {
+        if (name == null || name.isBlank()) {
+            return "user";
+        }
         String cleaned = name
                 .toLowerCase()
                 .replaceAll("[^a-z0-9]", ""); // remove special chars
+
+        if (cleaned.isEmpty()) {
+            return "user";
+        }
 
         // take first 5 characters safely
         if (cleaned.length() > 5) {
@@ -94,7 +101,11 @@ public class User {
 
 
     public void setDisplayName(String displayName) {
-        this.displayName = generateDisplayName(this.name);
+        if (displayName != null && !displayName.isBlank()) {
+            this.displayName = displayName;
+        } else if (this.name != null) {
+            this.displayName = generateDisplayName(this.name);
+        }
     }
 
 

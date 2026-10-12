@@ -24,4 +24,5 @@ public class PostSummaryDTO implements Serializable {
     private int likeCount;
     private Set<CategoryType> categories;
     private Set<String> tags;
+    private int readTime;
 }

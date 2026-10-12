@@ -7,14 +7,14 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: BlogV2Testing
+      POSTGRES_DB: Blog_API
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres -d BlogV2Testing" ]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d Blog_API" ]
       interval: 10s
       timeout: 5s
       retries: 5
     ports:
-      - "5433:5432"
+      - "5432:5434"
     networks:
       - blogv2-network
     volumes:
@@ -46,7 +46,7 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/BlogV2Testing
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/Blog_API
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
       SPRING_DATA_REDIS_HOST: blogv2-redis
