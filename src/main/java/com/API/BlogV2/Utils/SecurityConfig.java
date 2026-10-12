@@ -25,7 +25,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 
 @Configuration // Marks this class as a source of bean definitions for the Spring context
-@EnableWebSecurity // Enables Spring Security's web security support and provides the Spring MVC integration
+@EnableWebSecurity // Enables Spring Security's web security support and provides the Spring MVC
+                   // integration
 @EnableMethodSecurity // <--- CRITICAL: Enables @PreAuthorize
 public class SecurityConfig {
 
@@ -41,18 +42,19 @@ public class SecurityConfig {
     @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
     private String[] allowedOrigins;
 
-    @Bean // Tells Spring to manage the return value of this method as a Bean (the main security config)
+    @Bean // Tells Spring to manage the return value of this method as a Bean (the main
+          // security config)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http
 
-
                 .cors(Customizer.withDefaults())
-                // Disables CSRF protection (Common for REST APIs since they are usually stateless)
+                // Disables CSRF protection (Common for REST APIs since they are usually
+                // stateless)
                 .csrf(customizer -> customizer.disable())
 
-
-                // Ensures that EVERY request sent to the server must be from an authenticated user
+                // Ensures that EVERY request sent to the server must be from an authenticated
+                // user
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(
@@ -65,11 +67,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/v1/api-docs/**",
                                 "/api/v1/posts",
-                                "/actuator/**"
-                        )
+                                "/actuator/**")
                         .permitAll()
 
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/", "/error", "/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/imagekit/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/*/comments").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/*/posts").permitAll()
@@ -82,14 +83,17 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
 
                 // Enables the standard browser-based login form provided by Spring Security
-                //.formLogin(Customizer.withDefaults())
+                // .formLogin(Customizer.withDefaults())
 
-                // Enables HTTP Basic authentication (the browser popup/header-based auth for APIs)
-                //.httpBasic(Customizer.withDefaults())
+                // Enables HTTP Basic authentication (the browser popup/header-based auth for
+                // APIs)
+                // .httpBasic(Customizer.withDefaults())
 
-                // Configures session policy; NEVER means Spring won't create a session, but will use one if it exists
+                // Configures session policy; NEVER means Spring won't create a session, but
+                // will use one if it exists
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class) // Brute force protection
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class) // Brute force
+                                                                                                 // protection
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // JWT processing
                 // Finalizes the configuration and returns the built SecurityFilterChain object
                 .build();
@@ -97,8 +101,10 @@ public class SecurityConfig {
 
     @Bean // Defines how Spring should verify user credentials
     public AuthenticationProvider authenticationProvider() {
-        // DaoAuthenticationProvider is the standard provider for username/password checks
-        // We pass our service via the constructor (required in newer versions for immutability)
+        // DaoAuthenticationProvider is the standard provider for username/password
+        // checks
+        // We pass our service via the constructor (required in newer versions for
+        // immutability)
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider(myUserDetailsService);
 
         // Tells the provider NOT to hash passwords (comparing plain text).
@@ -109,9 +115,8 @@ public class SecurityConfig {
         return provider;
     }
 
-
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config){
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) {
         return config.getAuthenticationManager();
     }
 
