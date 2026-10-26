@@ -28,7 +28,7 @@ spring:
     type: redis
     redis:
       time-to-live: 600000 # 10 minutes
-      use-key-prefix: true;
+      use-key-prefix: true
       key-prefix: "blog_api::"
       cache-null-values: false
       enable-statistics: true
@@ -47,6 +47,10 @@ logging:
 # JWT secret MUST be set via env var in production
 jwt:
   secret: ${JWT_SECRET}
+
+app:
+  cookie:
+    secure: ${COOKIE_SECURE:true}
 
 server:
   error:

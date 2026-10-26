@@ -130,8 +130,9 @@ public class SecurityConfig {
         // Define allowed methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Allow all headers (including Authorization for your JWT)
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        // Allow all headers (including Authorization and correlation ID)
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Correlation-Id", "X-Requested-With"));
+        configuration.setExposedHeaders(Arrays.asList("X-Correlation-Id", "Set-Cookie"));
 
         // Allow credentials for OAuth2/Cookies
         configuration.setAllowCredentials(true);

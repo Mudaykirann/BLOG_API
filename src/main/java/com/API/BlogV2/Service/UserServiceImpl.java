@@ -94,11 +94,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "email", u.getEmail()));
 
         Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(user.getName(), u.getPassword())
+                new UsernamePasswordAuthenticationToken(u.getEmail(), u.getPassword())
         );
 
         if (auth.isAuthenticated()) {
-            return jwtService.generateToken(user.getName(), user.getId());
+            return jwtService.generateToken(user.getEmail(), user.getId());
         }
 
         throw new BlogAPIException(org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid credentials");

@@ -6,7 +6,7 @@ import com.API.BlogV2.Entity.Post;
 import org.springframework.data.domain.Page;
 import com.API.BlogV2.DTO.PageResponseDTO;
 
-import java.nio.file.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 import com.API.BlogV2.DTO.PostSummaryDTO;
 import com.API.BlogV2.DTO.PostDetailDTO;

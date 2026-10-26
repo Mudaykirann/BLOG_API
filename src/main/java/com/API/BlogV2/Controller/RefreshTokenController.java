@@ -49,9 +49,9 @@ public class RefreshTokenController {
         // Rotate token - delete old one
         refreshTokenService.deleteByUser(user);
 
-        // Generate new tokens (ensure we pass Name, not Email, to match MyUserDetailsService)
+        // Generate new tokens with unique email
         String newAccessToken = jwtService.generateToken(
-                user.getName(),
+                user.getEmail(),
                 user.getId()
         );
 
