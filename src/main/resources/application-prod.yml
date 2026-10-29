@@ -49,6 +49,8 @@ jwt:
   secret: ${JWT_SECRET}
 
 app:
+  admin:
+    secret: ${ADMIN_SECRET}
   cookie:
     secure: ${COOKIE_SECURE:true}
 

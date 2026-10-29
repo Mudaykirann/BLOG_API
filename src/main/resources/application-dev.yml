@@ -11,7 +11,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
@@ -38,6 +38,11 @@ imagekit:
   public-key: public_tyrM4mZBoHEn2G9H58kxN3Td454=
   private-key: private_pEisAjFDJMqxdJv8c0TRzUJ3K7g=
   url-endpoint: https://ik.imagekit.io/ew8wnk3vr
+
+# Dev-only admin secret for local registration testing
+app:
+  admin:
+    secret: dev_local_admin_secret_2026
 
 server:
   error:

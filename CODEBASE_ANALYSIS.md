@@ -271,23 +271,27 @@ Through this end-to-end audit, several architectural issues, bugs, and security 
    - **Root Cause**: The controller only has `@PreAuthorize("isAuthenticated()")` and passes `userId` directly to `postService.addNewPost(userId, p)`. It does not verify that `userId == authentication.principal.id`.
    - **Fix**: Either extract user ID directly from `SecurityContextHolder.getContext().getAuthentication().getPrincipal()`, or add `@PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")`.
 
-2. **Login Validation Bug (`Name is required`) (`LoginDTO.java:11-12`)**:
-   - `LoginDTO` defines `@NotBlank(message = "Name is required") private String name;`.
-   - When the frontend/client sends a standard login payload `{ "email": "...", "password": "..." }`, Spring's `@Valid` in `UserController.login` rejects the request with HTTP 400 (`Validation failed: Name is required`).
-   - `UserServiceImpl.verifyUser()` does not even use `name`.
-   - **Fix**: Remove `@NotBlank` and the `name` property from `LoginDTO`.
+2. **Login Validation Bug (`Name is required`) (`LoginDTO.java:11-12`) [RESOLVED]**:
+   - `LoginDTO` previously defined `@NotBlank(message = "Name is required") private String name;`, rejecting valid `{email, password}` payloads with HTTP 400.
+   - Removed the unused `name` field, `@NotBlank` annotation, and getter/setter from `LoginDTO`.
+   - Added `LoginValidationIntegrationTest` covering valid login requests without `name` as well as missing/invalid field rejections.
 
 3. **Insecure Rate Limiting IP Resolution & DoS Flaw (`RateLimitingFilter.java:39-65`)**:
    - `getClientIP()` uses `request.getRemoteAddr()`. Behind Docker bridge networks, reverse proxies (Nginx/Cloudflare), or load balancers, `remoteAddr` is identical for all users. Consequently, 10 failed login attempts from one attacker locks out **all** users globally.
    - Cache purge: `if (cache.size() >= 5000) cache.clear();` allows an attacker to flood requests with random spoofed headers, wipe the in-memory cache, and bypass rate limits entirely.
    - **Fix**: Inspect `X-Forwarded-For` header and consider Redis-backed Bucket4j for distributed rate limiting.
 
-4. **Default Admin Secret Exposure (`application.yml:14`)**:
-   - `admin.secret` defaults to `default_admin_secret`.
-   - In `UserServiceImpl.registerUser()`, if `dto.getAdminSecret()` matches this value, the account is granted `Role.ADMIN`. If deployed without setting the `ADMIN_SECRET` environment variable, anyone registering with `"default_admin_secret"` acquires full admin rights.
+4. **Default Admin Secret Exposure (`application.yml:14`) [RESOLVED]**:
+   - `admin.secret` insecure fallback (`default_admin_secret`) removed from `application.yml`.
+   - `application-prod.yml` requires `${ADMIN_SECRET}` without default, failing context initialization if absent in production.
+   - `UserServiceImpl` enforces `@PostConstruct` validation in `prod` ensuring `adminSecret` is non-null, non-blank, and not `"default_admin_secret"`.
+   - Admin registration strictly rejects elevation if `adminSecret` is empty, missing, or `"default_admin_secret"`.
 
-5. **XSS Sanitization Gap in Comments (`CommentServiceImpl.java:62-78`)**:
-   - While blog post content is passed through `HtmlSanitizerUtil`, comment content in `addComment()` and `updateComment()` is persisted raw without sanitization. An attacker can store XSS payloads (e.g., `<script src=...>` or `<img onerror=...>`) within the 100-character limit.
+5. **XSS Sanitization Gap in Comments (`CommentServiceImpl.java:62-78`) [RESOLVED]**:
+   - Replaced raw `Map<String, String>` in `CommentController` with validated `CommentRequestDTO` (`@NotBlank`, `@Size(min = 3, max = 100)`).
+   - Added plain-text HTML sanitization via `HtmlSanitizerUtil.sanitizeToPlainText()` to strip any HTML tags (e.g. `<script>`, `<img>`, `<svg>`).
+   - Enforced post-sanitization character length validation in `CommentServiceImpl.addComment()` and `updateComment()`.
+   - Added `CommentSanitizationIntegrationTest` verifying XSS stripping and validation rules.
 
 ---
 

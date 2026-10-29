@@ -11,14 +11,17 @@ import com.API.BlogV2.DTO.UserSignupDTO;
 import com.API.BlogV2.Entity.Role;
 import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Repository.UserRepository;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -40,11 +43,22 @@ public class UserServiceImpl implements UserService {
     private final JWTService jwtService;
 
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
+    private final Environment environment;
 
     private BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder(12);
 
     @org.springframework.beans.factory.annotation.Value("${app.admin.secret}")
     private String adminSecret;
+
+    @PostConstruct
+    public void validateAdminSecret() {
+        boolean isProd = Arrays.asList(environment.getActiveProfiles()).contains("prod");
+        if (isProd) {
+            if (this.adminSecret == null || this.adminSecret.isBlank() || "default_admin_secret".equals(this.adminSecret)) {
+                throw new IllegalStateException("ADMIN_SECRET environment variable is required and must be set to a secure, non-default value in production profile");
+            }
+        }
+    }
 
     public void registerUser(UserSignupDTO dto) {
 
@@ -59,8 +73,13 @@ public class UserServiceImpl implements UserService {
         user.setOccupation(dto.getOccupation());
         user.setPassword(bCryptPasswordEncoder.encode(dto.getPassword()));
 
-        if (dto.getAdminSecret() != null && dto.getAdminSecret().equals(this.adminSecret)) {
+        // Secure admin elevation: require non-blank, non-default secret matching exactly
+        if (this.adminSecret != null
+                && !this.adminSecret.isBlank()
+                && !"default_admin_secret".equals(this.adminSecret)
+                && this.adminSecret.equals(dto.getAdminSecret())) {
             user.setRole(Role.ADMIN);
+            log.info("Registered new user with ADMIN role: {}", dto.getEmail());
         } else {
             user.setRole(Role.USER);
         }
