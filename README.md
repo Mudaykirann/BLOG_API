@@ -1,4 +1,4 @@
-# 🚀 BlogV2 API - Next-Generation Blogging Backend
+# 🚀 Blog API -  Blogging Backend
 
 ![Java](https://img.shields.io/badge/Java-17-orange.svg?style=flat-square)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x%2B-brightgreen.svg?style=flat-square)
