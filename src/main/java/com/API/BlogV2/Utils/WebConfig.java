@@ -6,22 +6,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class WebConfig {
-
-    @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
-    private String[] allowedOrigins;
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // Allow all endpoints
-                        .allowedOrigins(allowedOrigins)
-                        .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-                        .allowedHeaders("*")
-                        .allowCredentials(true); // REQUIRED for Cookies/OAuth2 sessions
-            }
-        };
-    }
+public class WebConfig implements WebMvcConfigurer {
+    // CORS configuration is centralized in SecurityConfig (CorsConfigurationSource)
+    // to prevent duplicate headers and preflight conflicts with Spring Security.
 }

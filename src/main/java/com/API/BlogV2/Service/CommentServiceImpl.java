@@ -12,9 +12,11 @@ import com.API.BlogV2.Entity.User;
 import com.API.BlogV2.Repository.CommentRepository;
 import com.API.BlogV2.Repository.PostRepository;
 import com.API.BlogV2.Repository.UserRepository;
+import com.API.BlogV2.Utils.HtmlSanitizerUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,7 @@ public class CommentServiceImpl implements CommentService {
 
     private final PostRepository postRepository;
     private final PostMapper postMapper;
+    private final HtmlSanitizerUtil htmlSanitizerUtil;
 
 
 
@@ -65,8 +68,13 @@ public class CommentServiceImpl implements CommentService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 
+        String cleanContent = htmlSanitizerUtil.sanitizeToPlainText(Content);
+        if (cleanContent == null || cleanContent.length() < 3 || cleanContent.length() > 100) {
+            throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Comment content must be between 3 and 100 characters after sanitization");
+        }
+
         Comment comment = new Comment();
-        comment.setContent(Content);
+        comment.setContent(cleanContent);
         comment.setPost(post);
         comment.setUser(user);
         commentRepository.save(comment);
@@ -93,15 +101,20 @@ public class CommentServiceImpl implements CommentService {
 
         //Verify Comment belongs to the Post
         if (!comment.getPost().getId().equals(postId)) {
-            throw new BlogAPIException(org.springframework.http.HttpStatus.BAD_REQUEST, "Comment-Post mismatch");
+            throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Comment-Post mismatch");
         }
 
         // Only the creator can edit
         if (!comment.getUser().getId().equals(userId)) {
-            throw new BlogAPIException(org.springframework.http.HttpStatus.FORBIDDEN, "You can only edit your own comments");
+            throw new BlogAPIException(HttpStatus.FORBIDDEN, "You can only edit your own comments");
         }
 
-        comment.setContent(newContent);
+        String cleanContent = htmlSanitizerUtil.sanitizeToPlainText(newContent);
+        if (cleanContent == null || cleanContent.length() < 3 || cleanContent.length() > 100) {
+            throw new BlogAPIException(HttpStatus.BAD_REQUEST, "Comment content must be between 3 and 100 characters after sanitization");
+        }
+
+        comment.setContent(cleanContent);
         log.info("Comment updated: commentId={}", commentId);
     }
 

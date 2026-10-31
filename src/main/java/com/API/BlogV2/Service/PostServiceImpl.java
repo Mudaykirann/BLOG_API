@@ -27,7 +27,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Caching;
 
-import java.nio.file.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -61,7 +61,18 @@ public class PostServiceImpl implements PostService {
             @CacheEvict(value = "allPosts", allEntries = true),
             @CacheEvict(value = "userPosts", allEntries = true)
     })
+    @Transactional
     public void addNewPost(Long userId, PostRequestDTO postRequestDTO) {
+        org.springframework.security.core.Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserPrincple userDetails) {
+            Long currentUserId = userDetails.getId();
+            boolean isAdmin = userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (!currentUserId.equals(userId) && !isAdmin) {
+                throw new AccessDeniedException("You do not have permission to create a post for another user");
+            }
+        }
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
 

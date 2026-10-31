@@ -25,6 +25,10 @@ public class UserDTO {
     private String bio;
 
     private String profilePicUrl;
+    private com.API.BlogV2.Entity.Role role;
+
+    public com.API.BlogV2.Entity.Role getRole() { return role; }
+    public void setRole(com.API.BlogV2.Entity.Role role) { this.role = role; }
 
     // Getter & Setter
     public String getProfilePicUrl() { return profilePicUrl; }

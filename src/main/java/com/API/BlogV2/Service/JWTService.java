@@ -25,7 +25,7 @@ public class JWTService {
     }
 
 
-    public String generateToken(String name,Long id) {
+    public String generateToken(String subject, Long id) {
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", id);
@@ -34,7 +34,7 @@ public class JWTService {
                 builder()
                 .claims()
                 .add(claims)
-                .subject(name)
+                .subject(subject)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 20))
                 .and()

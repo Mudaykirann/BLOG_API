@@ -22,7 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
 
@@ -77,7 +77,7 @@ public class PostController {
     }
 
     @PostMapping(path = "/users/{userId}/posts")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
     public ResponseEntity<UnifiedResponse<Void>> addNewPost(
             @PathVariable("userId") Long userId,
             @Valid @RequestBody PostRequestDTO p

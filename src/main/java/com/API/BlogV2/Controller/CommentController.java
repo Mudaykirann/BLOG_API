@@ -2,10 +2,12 @@ package com.API.BlogV2.Controller;
 
 
 import com.API.BlogV2.DTO.CommentDTO;
+import com.API.BlogV2.DTO.CommentRequestDTO;
 import com.API.BlogV2.Entity.Comment;
 import com.API.BlogV2.Entity.UserPrincple;
 import com.API.BlogV2.Exception.UnifiedResponse;
 import com.API.BlogV2.Service.CommentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping(path = "api/v1")
@@ -41,12 +42,11 @@ public class CommentController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UnifiedResponse<Void>> addNewComment(
             @PathVariable("postId") Long postId,
-            @RequestBody Map<String ,String> requestBody
+            @Valid @RequestBody CommentRequestDTO request
     ){
         UserPrincple principal = (UserPrincple) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
-        String content = requestBody.get("content");
-        commentService.addComment(postId, principal.getId(), content);
+        commentService.addComment(postId, principal.getId(), request.getContent());
         return ResponseEntity.ok(UnifiedResponse.ok( "Comment Added successfully", null));
     }
 
@@ -56,14 +56,12 @@ public class CommentController {
     public ResponseEntity<UnifiedResponse<Void>> updateComment(
             @PathVariable("postId") Long postId,
             @PathVariable("comment_id") Long comment_id,
-            @RequestBody Map<String, String> requestBody
+            @Valid @RequestBody CommentRequestDTO request
     ){
         UserPrincple principal = (UserPrincple) SecurityContextHolder
                 .getContext().getAuthentication().getPrincipal();
 
-        String newContent = requestBody.get("content");
-
-        commentService.updateComment(postId, principal.getId(), comment_id, newContent);
+        commentService.updateComment(postId, principal.getId(), comment_id, request.getContent());
 
         return ResponseEntity.ok(UnifiedResponse.ok( "Comment updated successfully", null));
     }

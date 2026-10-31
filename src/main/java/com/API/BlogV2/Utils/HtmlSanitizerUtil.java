@@ -38,6 +38,9 @@ public class HtmlSanitizerUtil {
             .allowAttributes("class").globally()
             .toFactory();
 
+    // Policy that permits zero HTML elements, converting/stripping any tags to plain text
+    private static final PolicyFactory PLAIN_TEXT_POLICY = new HtmlPolicyBuilder().toFactory();
+
     /**
      * Sanitizes the given HTML/Markdown-rendered string.
      * Strips any elements not explicitly allowed above.
@@ -50,5 +53,19 @@ public class HtmlSanitizerUtil {
             return rawHtml;
         }
         return POLICY.sanitize(rawHtml);
+    }
+
+    /**
+     * Sanitizes user input strictly to plain text by stripping all HTML tags.
+     * Ideal for comments and plain text inputs.
+     *
+     * @param input the raw text or markup submitted by the user
+     * @return clean plain text without any HTML elements
+     */
+    public String sanitizeToPlainText(String input) {
+        if (input == null || input.isBlank()) {
+            return input;
+        }
+        return PLAIN_TEXT_POLICY.sanitize(input).trim();
     }
 }

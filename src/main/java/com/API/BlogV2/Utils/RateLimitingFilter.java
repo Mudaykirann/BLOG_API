@@ -18,8 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
-    // In-memory cache for IP addresses to buckets.
-    // For a multi-instance distributed setup, this should be backed by RedisProxyManager.
+    private static final int MAX_CACHE_ENTRIES = 5000;
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
 
     private Bucket createNewBucket() {
@@ -36,6 +35,10 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
         // Only apply rate limiting to authentication endpoints to prevent brute force
         if (requestURI.startsWith("/api/v1/auth/login") || requestURI.startsWith("/api/v1/auth/register")) {
+
+            if (cache.size() >= MAX_CACHE_ENTRIES) {
+                cache.clear(); // Safety purge if cache grows beyond threshold
+            }
 
             String ip = getClientIP(request);
             Bucket bucket = cache.computeIfAbsent(ip, k -> createNewBucket());
