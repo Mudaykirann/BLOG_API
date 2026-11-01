@@ -59,6 +59,7 @@ public class PostServiceImpl implements PostService {
 
     @Caching(evict = {
             @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "allPostsSummary", allEntries = true),
             @CacheEvict(value = "userPosts", allEntries = true)
     })
     @Transactional
@@ -104,6 +105,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Cacheable(value = "allPostsSummary", key = "#pageable.pageNumber + '_' + #pageable.pageSize + '_' + #pageable.sort")
     @Transactional
     public PageResponseDTO<PostSummaryDTO> getAllPostsSummary(Pageable pageable) {
         Page<Post> mappedPage = postRepository.findAllByStatus(PostStatus.PUBLISHED, pageable);
@@ -194,6 +196,12 @@ public class PostServiceImpl implements PostService {
     }
 
 
+    /**
+     * @deprecated Superseded by {@link #getAllPostsSummary(Pageable)} which serves the public feed.
+     * Retained for backward compatibility.
+     */
+    @Override
+    @Deprecated
     @Cacheable(value = "allPosts", key = "#page + '_' + #size")
     @Transactional()
     public PageResponseDTO<PostResponseDTO> getAllPosts(int page, int size) {
@@ -215,6 +223,7 @@ public class PostServiceImpl implements PostService {
     @Caching(evict = {
             @CacheEvict(value = "post", key = "#id"),
             @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "allPostsSummary", allEntries = true),
             @CacheEvict(value = "userPosts", allEntries = true),
             @CacheEvict(value = "postSearch", allEntries = true),
             @CacheEvict(value = "postsByCategory", allEntries = true),
@@ -262,6 +271,7 @@ public class PostServiceImpl implements PostService {
     @Caching(evict = {
             @CacheEvict(value = "post", key = "#id"),
             @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "allPostsSummary", allEntries = true),
             @CacheEvict(value = "userPosts", allEntries = true),
             @CacheEvict(value = "postSearch", allEntries = true),
             @CacheEvict(value = "postsByCategory", allEntries = true),
@@ -334,6 +344,7 @@ public class PostServiceImpl implements PostService {
     @Caching(evict = {
             @CacheEvict(value = "post", key = "#id"),
             @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "allPostsSummary", allEntries = true),
             @CacheEvict(value = "postBySlug", allEntries = true)
     })
     public void likePost(Long id) {
@@ -354,6 +365,7 @@ public class PostServiceImpl implements PostService {
     @Caching(evict = {
             @CacheEvict(value = "post", key = "#postId"),
             @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "allPostsSummary", allEntries = true),
             @CacheEvict(value = "userPosts", allEntries = true),
             @CacheEvict(value = "postBySlug", allEntries = true)
     })

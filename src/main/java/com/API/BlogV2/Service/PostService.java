@@ -19,6 +19,10 @@ public interface PostService {
 
     void addNewPost(Long userId, PostRequestDTO postRequestDTO);
     PageResponseDTO<PostResponseDTO> getPostsByUserId(Long userId, int page, int size);
+    /**
+     * @deprecated Superseded by {@link #getAllPostsSummary(Pageable)} which serves the public feed.
+     */
+    @Deprecated
     PageResponseDTO<PostResponseDTO> getAllPosts(int page, int size);
     void updatePost(Long id, PostRequestDTO dto) throws AccessDeniedException;
     void deletePost(Long id);

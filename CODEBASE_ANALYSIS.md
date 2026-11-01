@@ -297,29 +297,30 @@ Through this end-to-end audit, several architectural issues, bugs, and security 
 
 ### 🟡 Performance & Architectural Deficiencies
 
-1. **Uncached Public Feed vs Orphaned Cached Method (`PostServiceImpl.java:97 & 186`)**:
-   - The main feed endpoint `GET /api/v1/posts` calls `postService.getAllPostsSummary(pageable)`. This method has **no caching annotations**.
-   - Conversely, `postService.getAllPosts(page, size)` has `@Cacheable(value = "allPosts")` but is never called by `PostController`. The application's highest-traffic endpoint completely misses Redis caching.
+1. **[RESOLVED] Uncached Public Feed vs Orphaned Cached Method (`PostServiceImpl.java`)**:
+   - **Fix Applied**: Added `@Cacheable(value = "allPostsSummary", key = "#pageable.pageNumber + '_' + #pageable.pageSize + '_' + #pageable.sort")` to `postService.getAllPostsSummary(pageable)`.
+   - Updated all mutation methods (`addNewPost`, `updatePost`, `deletePost`, `likePost`, `updateCoverImage`, `addComment`, `deleteComment`) to evict `"allPostsSummary"`.
+   - Deprecated orphaned `postService.getAllPosts(page, size)`. The application's highest-traffic feed now hits Redis cache.
 
-2. **N+1 Database Query in Post Detail Fetch (`PostServiceImpl.java:133-140`)**:
-   - `PostRepository.findBySlugWithTagsAndComments` executes a `LEFT JOIN FETCH` on comments, but does **not** join fetch `comment.user`.
-   - In `PostServiceImpl`, iterating over comments and calling `c.getUser().getDisplayName()` lazily queries the `users` table once per comment ($N$ additional queries).
-   - **Fix**: Update the repository query to `LEFT JOIN FETCH p.comments c LEFT JOIN FETCH c.user`.
+2. **[RESOLVED] N+1 Database Query in Post Detail Fetch (`PostServiceImpl.java:143-172`)**:
+   - **Fix Applied**: Updated `PostRepository.findBySlugWithTagsAndComments` to `LEFT JOIN FETCH p.user LEFT JOIN FETCH p.tags LEFT JOIN FETCH p.comments c LEFT JOIN FETCH c.user`.
+   - Post author and all comment authors are now loaded in a single query, eliminating $N+1$ queries when generating `PostDetailDTO`.
 
-3. **Inaccessible Public Feeds (`/feed.xml`, `/sitemap.xml`) (`SecurityConfig.java:58-83`)**:
-   - Neither `/feed.xml` nor `/sitemap.xml` are listed in `.permitAll()`. They are intercepted by `.anyRequest().authenticated()`, resulting in 401 Unauthorized for search engines (Googlebot) and RSS readers.
+3. **[RESOLVED] Inaccessible Public Feeds (`/feed.xml`, `/sitemap.xml`) (`SecurityConfig.java:58-83`)**:
+   - **Fix Applied**: Added `"/feed.xml"` and `"/sitemap.xml"` to `SecurityFilterChain` permitAll list in `SecurityConfig.java`.
+   - RSS readers and search engine crawlers can now access public feeds anonymously without receiving 401 Unauthorized.
 
-4. **Inconsistent Response Contracts**:
-   - `PostController.getPostById()` returns raw `ResponseEntity<PostResponseDTO>`.
-   - `PostController.getCoverThumbnail()` and `UserController.getProfilePicThumbnail()` return `ResponseEntity<Map<String, String>>`.
-   - All other endpoints use `UnifiedResponse<T>`. Frontend API consumers expect a consistent `{ success, message, data }` structure across every route.
+4. **[RESOLVED] Inconsistent Response Contracts**:
+   - **Fix Applied**: Wrapped `PostController.getPostById()`, `PostController.getCoverThumbnail()`, and `UserController.getProfilePicThumbnail()` in `UnifiedResponse.ok(...)`.
+   - All REST API endpoints now reliably follow the standard `{ success, message, data }` contract.
 
-5. **Hardcoded Frontend Base URL (`FeedController.java:22`)**:
-   - `baseUrl` is hardcoded as `http://localhost:5173`. When deployed to staging or production, RSS and sitemap XML links will point to localhost instead of the real domain.
+5. **[RESOLVED] Hardcoded Frontend Base URL (`FeedController.java:22`)**:
+   - **Fix Applied**: Externalized `baseUrl` in `FeedController` using `@Value("${app.frontend.url:http://localhost:5173}")` and mapped it in `application.yml` and `docker-compose.yml` to `${FRONTEND_BASE_URL:http://localhost:5173}`.
+   - Production and staging environments can dynamically configure the domain for RSS and sitemap links via the `FRONTEND_BASE_URL` environment variable.
 
-6. **Missing Index for Full-Text Search (`PostRepository.java:68-69`)**:
-   - `searchByKeywordFTS` uses `to_tsvector('english', p.title || ' ' || p.content)`.
-   - Without a corresponding GIN index (`CREATE INDEX idx_fts ON posts USING gin(to_tsvector('english', title || ' ' || content));`), PostgreSQL performs a sequential table scan on every search.
+6. **[RESOLVED] Missing Index for Full-Text Search (`PostRepository.java:68-69`)**:
+   - **Fix Applied**: Created `schema.sql` defining `CREATE INDEX IF NOT EXISTS idx_fts ON posts USING gin(to_tsvector('english', title || ' ' || content));` and enabled deferred SQL initialization in `application.yml`.
+   - PostgreSQL now executes full-text searches using a GIN inverted index rather than sequential table scans.
 
 ---
 
