@@ -67,7 +67,9 @@ public class SecurityConfig {
                                 "/api/v1/auth/login",
                                 "/v1/api-docs/**",
                                 "/api/v1/posts",
-                                "/actuator/**")
+                                "/actuator/**",
+                                "/feed.xml",
+                                "/sitemap.xml")
                         .permitAll()
 
                         .requestMatchers("/", "/error", "/api/v1/auth/**").permitAll()

@@ -164,12 +164,12 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}/profile-pic/thumbnail")
-    public ResponseEntity<Map<String, String>> getProfilePicThumbnail(
+    public ResponseEntity<UnifiedResponse<Map<String, String>>> getProfilePicThumbnail(
             @PathVariable Long id,
             @RequestParam(defaultValue = "150") int width,
             @RequestParam(defaultValue = "150") int height) {
 
         String url = userService.getResizedProfilePic(id, width, height);
-        return ResponseEntity.ok(Map.of("url", url));
+        return ResponseEntity.ok(UnifiedResponse.ok("Profile pic thumbnail retrieved successfully", Map.of("url", url)));
     }
 }

@@ -4,6 +4,7 @@ import com.API.BlogV2.DTO.PageResponseDTO;
 import com.API.BlogV2.DTO.PostSummaryDTO;
 import com.API.BlogV2.Service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
@@ -19,11 +20,14 @@ import java.util.Locale;
 public class FeedController {
 
     private final PostService postService;
-    private final String baseUrl = "http://localhost:5173"; // Default base URL for frontend
+    private final String baseUrl;
 
     @Autowired
-    public FeedController(PostService postService) {
+    public FeedController(
+            PostService postService,
+            @Value("${app.frontend.url:http://localhost:5173}") String baseUrl) {
         this.postService = postService;
+        this.baseUrl = baseUrl;
     }
 
     @GetMapping(value = "/feed.xml", produces = MediaType.APPLICATION_XML_VALUE)

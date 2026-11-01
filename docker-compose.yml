@@ -57,6 +57,7 @@ services:
       IMAGEKIT_URL_ENDPOINT: ${IMAGEKIT_URL}
       ADMIN_SECRET: ${ADMIN_SECRET}
       SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:5173}
     networks:
       - blogv2-network
 

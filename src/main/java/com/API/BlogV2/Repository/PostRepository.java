@@ -24,8 +24,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
 
     @Query("SELECT DISTINCT p FROM Post p " +
+           "LEFT JOIN FETCH p.user " +
            "LEFT JOIN FETCH p.tags " +
            "LEFT JOIN FETCH p.comments c " +
+           "LEFT JOIN FETCH c.user " +
            "WHERE p.slug = :slug AND p.status = 'PUBLISHED'")
     Optional<Post> findBySlugWithTagsAndComments(@Param("slug") String slug);
 

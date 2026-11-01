@@ -59,6 +59,7 @@ public class CommentServiceImpl implements CommentService {
             @CacheEvict(value = "postBySlug", allEntries = true),
             @CacheEvict(value = "post", key = "#postId"),
             @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "allPostsSummary", allEntries = true),
             @CacheEvict(value = "userPosts", allEntries = true)
     })
     @Transactional
@@ -123,6 +124,7 @@ public class CommentServiceImpl implements CommentService {
             @CacheEvict(value = "postBySlug", allEntries = true),
             @CacheEvict(value = "post", key = "#postId"),
             @CacheEvict(value = "allPosts", allEntries = true),
+            @CacheEvict(value = "allPostsSummary", allEntries = true),
             @CacheEvict(value = "userPosts", allEntries = true)
     })
     @Transactional

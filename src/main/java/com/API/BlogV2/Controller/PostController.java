@@ -55,8 +55,9 @@ public class PostController {
 
 
     @GetMapping(path= "/posts/id/{post_id}")
-    public ResponseEntity<PostResponseDTO> getPostById(@PathVariable Long post_id) {
-        return ResponseEntity.ok(postService.getPostById(post_id));
+    public ResponseEntity<UnifiedResponse<PostResponseDTO>> getPostById(@PathVariable Long post_id) {
+        PostResponseDTO post = postService.getPostById(post_id);
+        return ResponseEntity.ok(UnifiedResponse.ok("Post retrieved successfully", post));
     }
 
     @GetMapping(path= "/posts/{slug:[a-zA-Z0-9-]+}")
@@ -151,13 +152,13 @@ public class PostController {
     }
 
     @GetMapping("/posts/{id}/cover-image/thumbnail")
-    public ResponseEntity<Map<String, String>> getCoverThumbnail(
+    public ResponseEntity<UnifiedResponse<Map<String, String>>> getCoverThumbnail(
             @PathVariable Long id,
             @RequestParam(defaultValue = "800") int width,
             @RequestParam(defaultValue = "400") int height) {
 
         String url = postService.getCoverThumbnail(id, width, height);
-        return ResponseEntity.ok(Map.of("url", url));
+        return ResponseEntity.ok(UnifiedResponse.ok("Cover thumbnail retrieved successfully", Map.of("url", url)));
     }
 
 }
